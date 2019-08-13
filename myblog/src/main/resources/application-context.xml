@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+    <!--设置被扫描的包范围-->
+    <context:component-scan base-package="com.xd.pjj.myblog"/>
+    <!--开启注解功能-->
+    <mvc:annotation-driven/>
+
+    <!--引入数据库配置文件-->
+    <context:property-placeholder location="classpath:db.properties"/>
+    <!--使用druid设置数据源-->
+    <!--init-method:初始化项目时加载bean-->
+    <!--destroy-method:销毁项目时关闭bean-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+          init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+    <!--SQLSessionFactory工厂组件-->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactoryBean">
+        <!--注入数据源-->
+        <property name="dataSource" ref="dataSource"/>
+        <!--注入实体类别名配置-->
+        <property name="typeAliasesPackage" value="com.xd.pjj.myblog.bean"/>
+        <!--注入mybatis插件配置-->
+        <property name="plugins">
+            <array>
+                <bean class="com.github.pagehelper.PageHelper">
+                    <property name="properties">
+                        <value>
+                            dialect=mysql
+                        </value>
+                    </property>
+                </bean>
+            </array>
+        </property>
+    </bean>
+    <!--转换mapper文件为接口实现-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--注入接口所在包路径-->
+        <property name="basePackage" value="com.xd.pjj.myblog.mapper"/>
+        <!--注入SQLSessionFactory工厂-->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryBean"/>
+    </bean>
+    <!--配置事物管理器-->
+    <bean id="txManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="captchaProducer" class="com.google.code.kaptcha.impl.DefaultKaptcha">
+        <property name="config">
+            <bean class="com.google.code.kaptcha.util.Config">
+                <constructor-arg>
+                    <props>
+                        <prop key="kaptcha.image.width">100</prop>
+                        <prop key="kaptcha.image.height">50</prop>
+                        <prop key="kaptcha.noise.impl">
+                            com.google.code.kaptcha.impl.NoNoise
+                        </prop>
+                        <prop key="kaptcha.textproducer.char.string">
+                            0123456789abcdefghijklmnopqrstuvwxyz
+                        </prop>
+                        <prop key="kaptcha.textproducer.char.length">4</prop>
+                    </props>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+    <!-- 启用事务注解 -->
+    <tx:annotation-driven transaction-manager="txManager"/>
+    <!--解决ajax请求返回json时的http406错误或者直接返回json文件的问题-->
+    <mvc:annotation-driven >
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter" />
+            <bean id="fastJsonHttpMessageConverter"	class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>text/html;charset=UTF-8</value>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <mvc:default-servlet-handler/>
+
+
+
+
+
+
+
+    <!--&lt;!&ndash;配置不需要被DispatcherServlet处理的静态资源&ndash;&gt;-->
+    <!--<mvc:resources mapping="/static/**" location="/static/"/>-->
+    <!--&lt;!&ndash;配置视图解析器&ndash;&gt;-->
+    <!--<bean id="viewResolver"-->
+          <!--class="org.springframework.web.servlet.view.InternalResourceViewResolver">-->
+        <!--&lt;!&ndash; 这里的配置是自动给后面控制器方法return的字符串加上前缀和后缀，变成一个可用的url地址 &ndash;&gt;-->
+        <!--<property name="prefix" value="/WEB-INF/jsp/"/>-->
+        <!--<property name="suffix" value=".jsp"/>-->
+    <!--</bean>-->
+</beans>
