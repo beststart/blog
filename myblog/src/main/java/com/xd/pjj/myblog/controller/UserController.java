@@ -30,4 +30,11 @@ public class UserController {
             return new Result(1,"登录成功！");
         }
     }
+
+    @RequestMapping("/logout")
+    @ResponseBody
+    public Result logout(HttpSession session){
+        session.removeAttribute("loginInfo");
+        return new Result(1);
+    }
 }
