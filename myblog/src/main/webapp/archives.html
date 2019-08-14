@@ -82,6 +82,43 @@
 <script src="./vendor/jquery/jquery.min.js"></script>
 <script src="./vendor/bootstrap/js/bootstrap.min.js"></script>
 <script src="./vendor/base.js"></script>
+<script>
+
+    $(function () {
+        $.get(getRootPath() + "/archives/index.action", function (result) {
+            if (result.code === 200) {
+                var archives_ListTxt = "";
+                for (var i = 0; i < result.data.length; i++) {
+                    // 某个归档信息
+                    var archive = result.data[i];
+                    archives_ListTxt += "<div class=\"categorys-item text-left\"><div class=\"categorys-title\">" + archive.date + "</div><div class=\"post-lists\">";
+                    for (var j = 0; j < archive.articles.length; j++) {
+                        // 某个归档下的所有文章
+                        var article = archive.articles[j];
+                        archives_ListTxt += "<div class=\"post-lists-body\">\n" +
+                            "                <div class=\"post-list-item\">\n" +
+                            "                    <div class=\"post-list-item-container\">\n" +
+                            "                        <div class=\"item-label\">\n" +
+                            "                            <div class=\"item-title\">\n" +
+                            "                                <a href='post.html?aid=" + article.id + "'>" + article.title + "</a>\n" +
+                            "                            </div>\n" +
+                            "                            <div class=\"item-meta clearfix text-right\">\n" +
+                            "                                <div class=\"item-meta-date text-left\">发布于：" + new Date(article.created * 1000).toLocaleString() + "</div>\n" +
+                            "                            </div>\n" +
+                            "                        </div>\n" +
+                            "                    </div>\n" +
+                            "                </div>\n" +
+                            "            </div>";
+                    }
+                    archives_ListTxt += "</div></div></div>";
+                }
+                $("#archive_list").html(archives_ListTxt);
+            }
+        }, "json");
+    });
+
+
+</script>
 
 </body>
 

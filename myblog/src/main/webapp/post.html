@@ -129,6 +129,123 @@
 <script src="./vendor/editor/lib/flowchart.min.js"></script>
 <script src="./vendor/editor/lib/jquery.flowchart.min.js"></script>
 <script src="./vendor/editor/editormd.js"></script>
+<script>
+    $(function () {
+        //获取文章ID
+        var aid = getUrlParam("aid");
+        //获取文章信息
+        $.get(getRootPath() + "/front/article/articleDetails?aid=" + aid, function (result) {
+
+            if (result.code === 200) {
+                $("#title").text(result.data.title);
+
+                $("#other").text("发布于" + new Date(result.data.created * 1000).toLocaleDateString());
+
+                //分类列表-----------------------------------------------------
+                var categorie_listTxt = "";
+                for (var i = 0; i < result.data.categories.length; i++) {
+                    categorie_listTxt += "<span class=\"label label-success\">#" + result.data.categories[i].name + "</span>";
+                }
+                $("#categorie_list").html(categorie_listTxt);
+
+
+                var comment_form = $("#comment_form");
+                var comment_forbid = $("#comment_forbid");
+
+                //评论是否关闭
+                if (result.data.allowComment === 1) {
+                    comment_forbid.remove();
+                } else {
+                    comment_form.remove();
+                }
+                var post_content_View = editormd.markdownToHTML("post_content", {
+                    markdown: result.data.content,
+                    htmlDecode: "style,script,iframe",
+                    emoji: true,
+                    taskList: true,
+                    tex: true,  // 默认不解析
+                    flowChart: true,  // 默认不解析
+                    sequenceDiagram: true  // 默认不解析
+                });
+            } else {
+                tale.alertError(result.msg);
+            }
+        }, "json");
+        loadCommentPage(aid, 1);
+    });
+
+    var tale = new $.tale();
+
+    function subComment() {
+        var comment_author = $("#comment_author").val();
+        var comment_content = $("#comment_content").val();
+        var aid = getUrlParam("aid");
+        $.post(getRootPath() + "/front/comment/addComment.action", "aid=" + aid + "&content=" + comment_content + "&author=" + comment_author, function (result) {
+            if (result.code === 200) {
+                location.href = getRootPath() + "/post.html?aid=" + aid;
+            } else {
+                tale.alertError(result.msg);
+            }
+        }, "json");
+    }
+
+
+    /**
+     * 分页加载评论数据
+     * @param aid 文章id
+     * @param currentPage 页码
+     */
+    function loadCommentPage(aid, currentPage) {
+        //获取文章评论信息
+        $.get(getRootPath() + "/front/comment/getCommentByArticleId", "aid=" + aid + "&currentPage=" + currentPage, function (result) {
+            //没有评论
+            if (result.code === 100) {
+                $("#comment").remove();
+                return;
+            } else if (result.code === 200) {
+                //文章评论内容
+                var comment_listTxt = "";
+                for (var i = 0; i < result.data.list.length; i++) {
+                    var comment = result.data.list[i];
+                    comment_listTxt += "<div>\n" +
+                        "                    <h3>" + comment.author + "</h3>\n" +
+                        "                    <p>" + comment.content + "</p>\n" +
+                        "                    <span>" + new Date(comment.created * 1000).toLocaleString() + "</span>\n" +
+                        "               <hr/> </div>";
+                }
+                $("#comment_list").html(comment_listTxt);
+
+                //分页条
+                var $paging_toolbar = $("#paging_toolbar");
+                var paging_toolbarTxt = "<li class='disabled'><a href='#'>第" + result.data.currentPage + "页 / 共" + result.data.pageCount + "页</a></li>";
+
+                //如果当前是第一页，那么【上一页】按钮不可点击
+                if (currentPage === 1) {
+                    paging_toolbarTxt += "<li class='disabled'><a href='#'>上一页</a></li>";
+                } else {
+                    paging_toolbarTxt += "<li onclick='loadCommentPage(" + aid + "," + (currentPage - 1) + ")'><a href='#'>上一页</a></li>";
+                }
+                //遍历生成页码
+                for (var i = result.data.pageBeginIndex; i <= result.data.pageEndIndex; i++) {
+                    if (result.data.currentPage === i) {
+                        paging_toolbarTxt += "<li onclick='loadCommentPage(" + aid + "," + i + ")' class='active'><a href='#'>" + i + "</a></li>";
+                    } else {
+                        paging_toolbarTxt += "<li onclick='loadCommentPage(" + aid + "," + i + ")' ><a href='#'>" + i + "</a></li>";
+                    }
+                }
+                //如果当前是最后一页，那么【下一页】按钮不可点击
+                if (currentPage === result.data.pageCount) {
+                    paging_toolbarTxt += "<li class='disabled'><a href='#'>下一页</a></li>";
+                } else {
+                    paging_toolbarTxt += "<li onclick='loadCommentPage(" + aid + "," + (currentPage + 1) + ")'><a href='#'>下一页</a></li>";
+                }
+                $paging_toolbar.html(paging_toolbarTxt);
+            } else {
+                tale.alertError(result.msg);
+            }
+        }, "json");
+    }
+</script>
 </body>
 
 </html>

@@ -9,6 +9,7 @@
     <link rel="shortcut icon" href="../static/image/logo.png"/>
     <link href="../vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
     <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.4.1/sweetalert2.min.css" rel="stylesheet"/>
     <link href="../vendor/css/style.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
@@ -65,7 +66,7 @@
                             </a>
                         </li>
                         <li>
-                            <a id="article_edit" href="article_edit.html" class="waves-effect">
+                            <a id="article_edit" href="article_edit.html?type=newArticle" class="waves-effect">
                                 <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                                 <span> 发布文章 </span>
                             </a>
@@ -108,7 +109,7 @@
                             <div class="mini-stat clearfix bx-shadow bg-info">
                                 <span class="mini-stat-icon"><i class="fa fa-quote-right" aria-hidden="true"></i></span>
                                 <div class="mini-stat-info text-right">
-                                    发表了<span class="counter" id="articleCount">10</span>篇文章
+                                    发表了<span class="counter" id="articleCount"></span>篇文章
                                 </div>
                             </div>
                         </div>
@@ -116,7 +117,7 @@
                             <div class="mini-stat clearfix bg-purple bx-shadow">
                                 <span class="mini-stat-icon"><i class="fa fa-comments-o" aria-hidden="true"></i></span>
                                 <div class="mini-stat-info text-right">
-                                    收到了<span class="counter" id="commentCount">20</span>条留言
+                                    收到了<span class="counter" id="commentCount"></span>条留言
                                 </div>
                             </div>
                         </div>
@@ -125,7 +126,7 @@
                                 <span class="mini-stat-icon"><i class="fa fa-cloud-upload"
                                                                 aria-hidden="true"></i></span>
                                 <div class="mini-stat-info text-right">
-                                    上传了<span class="counter" id="attachesCount">50</span>个附件
+                                    上传了<span class="counter" id="attachesCount"></span>个附件
                                 </div>
                             </div>
                         </div>
@@ -182,7 +183,61 @@
 </div>
 <script src="../vendor/jquery/jquery.min.js"></script>
 <script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.4.1/sweetalert2.min.js"></script>
 <script src="../vendor/jquery.app.js"></script>
 <script src="../vendor/base.js"></script>
+
+<script type="text/javascript">
+    var tale = new $.tale();
+    $(function () {
+        //显示统计数据
+        $.get(getRootPath() + "/admin/getStatistics.action", function (result) {
+            if (result.code === 200) {
+                //发表文章个数
+                $("#articleCount").text(result.data.articleCount);
+                //评论个数
+                $("#commentCount").text(result.data.commentCount);
+                //附件个数
+                $("#attachesCount").text(result.data.attachesCount);
+
+                //判断是否有最新评论
+                if (result.data.comments.length > 0) {
+                    //最新评论
+                    var commentListTxt = "";
+                    for (var i = 0; i < result.data.comments.length; i++) {
+                        var comment = result.data.comments[i];
+                        commentListTxt += "<li class=\"list-group-item\">\n" +
+                            "<div> <a href=\"#\" target=\"_blank\" >" + comment.author + "</a>\n" +
+                            "</div>\n" +
+                            "评论于：<span>" + new Date(comment.created * 1000).toLocaleString() + "</span><br/>\n" +
+                            "<a href=\"#\" target=\"_blank\">" + comment.content + "</a>\n" +
+                            "</li>";
+                    }
+                    $("#comment_ul").html(commentListTxt);
+                    $("#not_comment").remove();
+                } else {
+                    //没有最新评论删除掉评论布局
+                    $("#comment_ul").remove();
+                }
+
+                //最新文章
+                var articleListTxt = "";
+                for (var i = 0; i < result.data.articles.length; i++) {
+                    var article = result.data.articles[i];
+                    articleListTxt += "<li class=\"list-group-item\">\n" +
+                        "<a target=\"_blank\" href='" + getRootPath() + "/post.html?aid=" + article.id + "'>" + article.title + "</a>\n" +
+                        "</li>";
+                }
+                $("#new_article").html(articleListTxt);
+            } else if (result.code === 403) {
+                show403();
+            } else {
+                tale.alertError(result.msg);
+            }
+        }, 'json');
+    });
+</script>
+
+
 </body>
 </html>

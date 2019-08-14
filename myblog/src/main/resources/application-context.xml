@@ -64,7 +64,7 @@
                             com.google.code.kaptcha.impl.NoNoise
                         </prop>
                         <prop key="kaptcha.textproducer.char.string">
-                            0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
+                            0123456789abcdefghijklmnopqrstuvwxyz
                         </prop>
                         <prop key="kaptcha.textproducer.char.length">4</prop>
                     </props>

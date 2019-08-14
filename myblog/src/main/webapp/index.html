@@ -103,5 +103,67 @@
 <script src="./vendor/jquery/jquery.min.js"></script>
 <script src="./vendor/base.js"></script>
 <script src="./vendor/bootstrap/js/bootstrap.min.js"></script>
+<script>
+    $(function () {
+        loadPage(1);
+    });
+
+    /**
+     * 加载分页数据
+     * @param currentPage 当前分页
+     */
+    function loadPage(currentPage) {
+        $.get(getRootPath() + '/front/index/articleList', "currentPage=" + currentPage, function (result) {
+            if (result.code === 200) {
+                var articles = "";
+                for (var i = 0; i < result.data.list.length; i++) {
+                    var article = result.data.list[i];
+                    articles += "<div id=\"post_item\" class='post_item'>\n" +
+                        "                <a href='post.html?aid=" + article.id + "'>\n" +
+                        "                <h1>" + article.title + "</h1>\n" +
+                        "                </a>\n" +
+                        "                <div class=\"post_content\">\n" +
+                        "                    <p>\n" + article.intro +
+                        "                    </p>\n" +
+                        "                        <p>\n" +
+                        "                            更新时间：" + new Date(article.created * 1000).toLocaleDateString() +
+                        "                        </p>\n" +
+                        "                </div>\n" +
+                        "            </div>";
+                }
+                $("#article").html(articles);
+
+                //分页条
+                var $paging_toolbar = $("#paging_toolbar");
+                var paging_toolbarTxt = "<li class='disabled'><a href='#'>第" + result.data.currentPage + "页 / 共" + result.data.pageCount + "页</a></li>";
+
+                //如果当前是第一页，那么【上一页】按钮不可点击
+                if (currentPage === 1) {
+                    paging_toolbarTxt += "<li class='disabled'><a href='#'>上一页</a></li>";
+                } else {
+                    paging_toolbarTxt += "<li onclick='loadPage(" + (currentPage - 1) + ")'><a href='#'>上一页</a></li>";
+                }
+                //遍历生成页码
+                for (var i = result.data.pageBeginIndex; i <= result.data.pageEndIndex; i++) {
+                    if (result.data.currentPage === i) {
+                        paging_toolbarTxt += "<li onclick='loadPage(" + i + ")' class='active'><a href='#'>" + i + "</a></li>";
+                    } else {
+                        paging_toolbarTxt += "<li onclick='loadPage(" + i + ")' ><a href='#'>" + i + "</a></li>";
+                    }
+                }
+                //如果当前是最后一页，那么【下一页】按钮不可点击
+                if (currentPage === result.data.pageCount) {
+                    paging_toolbarTxt += "<li class='disabled'><a href='#'>下一页</a></li>";
+                } else {
+                    paging_toolbarTxt += "<li onclick='loadPage(" + (currentPage + 1) + ")'><a href='#'>下一页</a></li>";
+                }
+                $paging_toolbar.html(paging_toolbarTxt);
+            } else {
+                tale.alertError(result.msg);
+            }
+        }, "json");
+    }
+
+</script>
 </body>
 </html>

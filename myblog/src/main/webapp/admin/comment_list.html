@@ -11,9 +11,12 @@
     <link href="../vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
     <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
     <link href="../vendor/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.4.1/sweetalert2.min.css" rel="stylesheet"/>
     <link href="../vendor/tagsinput/jquery.tagsinput.css" rel="stylesheet"/>
     <link href="../vendor/select2.dist.css/select2-bootstrap.css" rel="stylesheet"/>
     <link href="../vendor/toggles/toggles.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/multi-select/0.9.12/css/multi-select.min.css" rel="stylesheet"/>
+    <link href="https://cdn.bootcss.com/select2/3.4.8/select2.min.css" rel="stylesheet">
     <style>
         #tags_addTag input {
             width: 100%;
@@ -170,9 +173,123 @@
     </div>
 </div>
 <!--所有页面必须导入start-->
-<script src="../vendor/jquery/jquery.js"></script>
+<script src="https://cdn.bootcss.com/jquery/2.2.3/jquery.min.js"></script>
 <script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.4.1/sweetalert2.min.js"></script>
 <script src="../vendor/jquery.app.js"></script>
 <script src="../vendor/base.js"></script>
+<!--所有页面必须导入end-->
+<script type="text/javascript">
+    var tale = new $.tale();
+
+    $(function () {
+        loadPage(1);
+    });
+
+
+    function loadPage(currentPage) {
+        $.get("comment/getAllComment.action", "currentPage=" + currentPage, function (result) {
+            if (result.code === 200) {
+                //没有数据
+                if (result.data == null) {
+                    $("#tb_comment").html("<tr><td class='text-center' colspan=\"7\">没有数据</td></tr>");
+                    return;
+                }
+                if (result.code === 200) {
+                    //表格代码
+                    var trTxt = "";
+                    for (var i = 0; i < result.data.list.length; i++) {
+                        var comment = result.data.list[i];
+                        trTxt += "<tr>\n" +
+                            "                                <td>" + comment.id + "</td>\n" +
+                            "                                <td>" + comment.author + "</td>\n" +
+                            "                                <td>" + comment.content + "</td>\n" +
+                            "                                <td>" + new Date(comment.created).toLocaleString() + "</td>" +
+                            "                                <td>" + comment.ip + "</td>";
+                        if (comment.status === 0) {
+                            trTxt += "<td><span class='label label-default'>未审核</span></td>";
+                        } else if (comment.status === 1) {
+                            trTxt += "<td><span class='label label-success'>审核通过</span></td>";
+                        } else {
+                            trTxt += "<td><span class='label label-danger'>拒绝</span></td>";
+                        }
+                        trTxt += "                                <td>" +
+                            "                                    <button class='btn btn-success btn-sm waves-effect waves-light' onclick='updateStatus(" + comment.id + ",\"通过\",1," + currentPage + ")'>通过</button>\n" +
+                            "                                    <button class=\"btn btn-warning btn-sm waves-effect waves-light\" onclick='updateStatus(" + comment.id + ",\"拒绝\",2," + currentPage + ")'>拒绝</button>\n" +
+                            "                                    <button class=\"btn btn-danger btn-sm waves-effect waves-light\" onclick='deleteComment(" + comment.id + "," + currentPage + ")'>删除</button>\n" +
+                            "                                </td>\n" +
+                            "                            </tr>";
+                    }
+                    $("#tb_comment").html(trTxt);
+                    //分页条
+                    var $paging_toolbar = $("#paging_toolbar");
+                    var paging_toolbarTxt = "<li class='disabled'><a href='#'>第" + result.data.currentPage + "页 / 共" + result.data.pageCount + "页</a></li>";
+
+                    //如果当前是第一页，那么【上一页】按钮不可点击
+                    if (currentPage === 1) {
+                        paging_toolbarTxt += "<li class='disabled'><a href='#'>上一页</a></li>";
+                    } else {
+                        paging_toolbarTxt += "<li onclick='loadPage(" + (currentPage - 1) + ")'><a href='#'>上一页</a></li>";
+                    }
+                    //遍历生成页码
+                    for (var i = result.data.pageBeginIndex; i <= result.data.pageEndIndex; i++) {
+                        if (result.data.currentPage === i) {
+                            paging_toolbarTxt += "<li onclick='loadPage(" + i + ")' class='active'><a href='#'>" + i + "</a></li>";
+                        } else {
+                            paging_toolbarTxt += "<li onclick='loadPage(" + i + ")' ><a href='#'>" + i + "</a></li>";
+                        }
+                    }
+                    //如果当前是最后一页，那么【下一页】按钮不可点击
+                    if (currentPage === result.data.pageCount) {
+                        paging_toolbarTxt += "<li class='disabled'><a href='#'>下一页</a></li>";
+                    } else {
+                        paging_toolbarTxt += "<li onclick='loadPage(" + (currentPage + 1) + ")'><a href='#'>下一页</a></li>";
+                    }
+                    $paging_toolbar.html(paging_toolbarTxt);
+                }
+
+            } else if (result.code === 403) {
+                show403();
+            } else {
+                tale.alertError(result.msg);
+            }
+        });
+    }
+
+    function deleteComment(cid, currentPage) {
+        tale.alertConfirm({
+            title: '确定删除该评论吗?',
+            then: function () {
+                $.post('comment/deleteById.action', "cid=" + cid, function (result) {
+                    if (result.code === 200) {
+                        //删除后直接刷新页面
+                        loadPage(currentPage);
+                    }else if (result.code === 403) {
+                        show403();
+                    } else {
+                        tale.alertError(result.msg);
+                    }
+                });
+            }
+        });
+    }
+    function updateStatus(cid, msg, status, currentPage) {
+        tale.alertConfirm({
+            title: "确定" + msg + "该评论吗?",
+            then: function () {
+                $.post('comment/switchCommentStatus.action', "cid=" + cid + "&status=" + status, function (result) {
+                    if (result.code === 200) {
+                        //刷新页面
+                        loadPage(currentPage);
+                    } else if (result.code === 403) {
+                        show403();
+                    } else {
+                        tale.alertError(result.msg);
+                    }
+                }, "json");
+            }
+        });
+    }
+</script>
 </body>
 </html>

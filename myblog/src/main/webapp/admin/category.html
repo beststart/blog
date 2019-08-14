@@ -10,9 +10,12 @@
     <link href="../vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
     <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
     <link href="../vendor/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.4.1/sweetalert2.min.css" rel="stylesheet"/>
     <link href="../vendor/tagsinput/jquery.tagsinput.css" rel="stylesheet"/>
     <link href="../vendor/select2.dist.css/select2-bootstrap.css" rel="stylesheet"/>
     <link href="../vendor/toggles/toggles.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/multi-select/0.9.12/css/multi-select.min.css" rel="stylesheet"/>
+    <link href="https://cdn.bootcss.com/select2/3.4.8/select2.min.css" rel="stylesheet">
     <style>
         .table tbody tr td {
             vertical-align: middle;
@@ -209,7 +212,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                        <button type="button" class="btn btn-primary">保存</button>
+                        <button type="button" class="btn btn-primary" onclick="updateCategory()">保存</button>
                     </div>
                 </div>
             </div>
@@ -222,8 +225,149 @@
 <!--所有页面必须导入start-->
 <script src="../vendor/jquery/jquery.min.js"></script>
 <script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.4.1/sweetalert2.min.js"></script>
 <script src="../vendor/jquery.app.js"></script>
 <script src="../vendor/base.js"></script>
 <!--所有页面必须导入end-->
+
+
+<script type="text/javascript">
+    var tale = new $.tale();
+
+    $(function () {
+        //获取分类列表数据
+        loadPage(1);
+    });
+
+    /**
+     * 加载分页数据
+     * @param currentPage 当前分页
+     */
+    function loadPage(currentPage) {
+        $.get(getRootPath() + '/admin/category/listPage.action', "currentPage=" + currentPage, function (result) {
+            if (result.code === 200) {
+                //没有数据
+                if (result.data == null) {
+                    $("#tb_tbody").html("<tr><td class='text-center' colspan=\"4\">没有数据</td></tr>");
+                    return;
+                }
+                var trTxt = "";
+                for (var i = 0; i < result.data.list.length; i++) {
+                    var category = result.data.list[i];
+                    trTxt +=
+                        "<tr>" +
+                        "<td>" + category.id + "</td>" +
+                        "<td>" + category.name + "</td>" +
+                        "<td>" + category.description + "</td>" +
+                        "<td><button class='btn btn-sm btn-danger' onclick='deleteCategory(" + category.id + ")' >删除</button>" +
+                        "<button class='btn btn-sm btn-primary' onclick='showEditCategory(" + category.id + ")'>编辑</button></td>" +
+                        "</tr>";
+                }
+                $("#tb_tbody").html(trTxt);
+
+                //分页条
+                var $paging_toolbar = $("#paging_toolbar");
+                var paging_toolbarTxt = "<li class='disabled'><a href='#'>第" + result.data.currentPage + "页 / 共" + result.data.pageCount + "页</a></li>";
+
+                //如果当前是第一页，那么【上一页】按钮不可点击
+                if (currentPage === 1) {
+                    paging_toolbarTxt += "<li class='disabled'><a href='#'>上一页</a></li>";
+                } else {
+                    paging_toolbarTxt += "<li onclick='loadPage(" + (currentPage - 1) + ")'><a href='#'>上一页</a></li>";
+                }
+                //遍历生成页码
+                for (var i = result.data.pageBeginIndex; i <= result.data.pageEndIndex; i++) {
+                    if (result.data.currentPage === i) {
+                        paging_toolbarTxt += "<li onclick='loadPage(" + i + ")' class='active'><a href='#'>" + i + "</a></li>";
+                    } else {
+                        paging_toolbarTxt += "<li onclick='loadPage(" + i + ")' ><a href='#'>" + i + "</a></li>";
+                    }
+                }
+                //如果当前是最后一页，那么【下一页】按钮不可点击
+                if (currentPage === result.data.pageCount) {
+                    paging_toolbarTxt += "<li class='disabled'><a href='#'>下一页</a></li>";
+                } else {
+                    paging_toolbarTxt += "<li onclick='loadPage(" + (currentPage + 1) + ")'><a href='#'>下一页</a></li>";
+                }
+                $paging_toolbar.html(paging_toolbarTxt);
+            } else if (result.code === 403) {
+                show403();
+            }
+        }, "json");
+    }
+
+
+    /**
+     * 删除分类信息
+     * @param cid 分类id
+     */
+    function deleteCategory(cid) {
+        tale.alertConfirm({
+            title: "确定删除" + cid + "吗?",
+            then: function () {
+                $.post(getRootPath() + '/admin/category/deleteById.action', {cid: cid}, function (result) {
+                    if (result.code === 200) {
+                        tale.alertOkAndReload('删除成功');
+                    } else {
+                        tale.alertError(result.msg || '删除失败');
+                    }
+                }, "json");
+            }
+        });
+    }
+
+    /**
+     * 显示分类编辑框
+     * @param cid 分类id
+     */
+    function showEditCategory(cid) {
+        $.post(getRootPath() + "/admin/category/findById.action", "cid=" + cid, function (result) {
+            if (result.code === 200) {
+                $("#category_id").val(result.data.id);
+                $("#category_name").val(result.data.name);
+                $("#category_description").val(result.data.description);
+                $('#edit_modal').modal("show");
+            } else if (result.code === 403) {
+                show403();
+            }
+        }, "json");
+    }
+
+    /**
+     * 更新分类信息
+     */
+    function updateCategory() {
+        var id = $("#category_id").val();
+        var name = $("#category_name").val();
+        var description = $("#category_description").val();
+        $.post(getRootPath() + "/admin/category/updateCategoryById.action", "id=" + id + "&name=" + name + "&description=" + description, function (result) {
+            if (result.code === 200) {
+                $('#edit_modal').modal("hide");
+                tale.alertOkAndReload('更新成功');
+            } else if (result.code === 403) {
+                show403();
+            } else {
+                tale.alertError(result.msg);
+            }
+        }, "json");
+    }
+
+    /**
+     * 添加分类
+     */
+    function addCategory() {
+        var cname = $('#cname').val();
+        $.post('category/addCategory.action', {cname: cname}, function (result) {
+            if (result.code === 200) {
+                tale.alertOkAndReload('分类保存成功');
+            } else if (result.code === 403) {
+                show403();
+            } else {
+                tale.alertError(result.msg);
+            }
+        }, "json");
+    }
+
+</script>
 </body>
 </html>

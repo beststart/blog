@@ -10,6 +10,8 @@
     <link href="../vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
     <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
     <link href="../vendor/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.4.1/sweetalert2.min.css" rel="stylesheet"/>
+    <link href="https://cdn.bootcss.com/dropzone/4.3.0/min/dropzone.min.css" rel="stylesheet">
 </head>
 <style>
 
@@ -185,12 +187,60 @@
     </div>
 </div>
 <!--所有页面必须导入start-->
-<script src="../vendor/jquery/jquery.js"></script>
+<script src="https://cdn.bootcss.com/jquery/2.2.3/jquery.min.js"></script>
 <script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.4.1/sweetalert2.min.js"></script>
 <script src="../vendor/jquery.app.js"></script>
 <script src="../vendor/base.js"></script>
 <!--所有页面必须导入end-->
+<script src="https://cdn.bootcss.com/dropzone/4.3.0/min/dropzone.min.js"></script>
+<script src="https://cdn.bootcss.com/clipboard.js/1.6.0/clipboard.min.js"></script>
 <script type="text/javascript">
+
+    $(function () {
+        $.ajax({
+            url: "file/getAllFile.action",
+            type: 'post',
+            data: "",
+            processData: false,
+            contentType: false,
+            success: function (result) {
+                if (result.code === 200) {
+                    var divTxt = "";
+                    var $images_list = $("#images_list");
+                    for (var i = 0; i < result.data.list.length; i++) {
+                        var file = result.data.list[i];
+                        divTxt += "<div class=\"col-md-2 text-center\">\n" +
+                            "                                    <a href=\"#\" target=\"_blank\">\n" +
+                            "                                        <img class=\"attach-img\" src='" + file.url + "'/>\n" +
+                            "                                    </a>\n" +
+                            "                                    <div class=\"clearfix m-t-10\">\n" +
+                            "                                        <span class=\"attach-text\" data-toggle=\"tooltip\" data-placement=\"top\">"+file.key+"</span>\n" +
+                            "                                    </div>\n" +
+                            "                                    <div class=\"clearfix\">\n" +
+                            "                                        <button type=\"button\" url='" + file.url + "' class=\"btn btn-warning btn-sm waves-effect waves-light copy\">\n" +
+                            "                                            <i class=\"fa fa-copy\"></i> <span>复制</span>\n" +
+                            "                                        </button>\n" +
+                            "                                        <button type=\"button\" class=\"btn btn-danger btn-sm waves-effect waves-light\"\n" +
+                            "                                                onclick='deleteFile(" + file.id + ")'>\n" +
+                            "                                            <i class=\"fa fa-trash-o\"></i> <span>删除</span>\n" +
+                            "                                        </button>\n" +
+                            "                                    </div>\n" +
+                            "                                </div>";
+                    }
+                    $images_list.html(divTxt);
+                } else if (result.code === 403) {
+                    show403();
+                } else {
+                    tale.alertError(result.msg);
+                }
+            }
+        });
+    });
+
+
+    var tale = new $.tale();
+
     $("#dropzone").dropzone({
         paramName: "file",
         url: "/admin/attach/upload",
@@ -212,12 +262,61 @@
             return $(trigger).attr('url');
         }
     });
+
     clipboard.on('success', function (e) {
         console.info('Action:', e.action);
         console.info('Text:', e.text);
         console.info('Trigger:', e.trigger);
         e.clearSelection();
     });
+
+    function deleteFile(fid) {
+        tale.alertConfirm({
+            title: '确定删除该附件吗?',
+            then: function () {
+                $.post(getRootPath() + "/admin/file/deleteFileById.action", "fid=" + fid, function (result) {
+                    if (result.code === 200) {
+                        tale.alertOkAndReload('附件删除成功');
+                    } else if (result.code === 403) {
+                        show403();
+                    } else {
+                        tale.alertError(result.msg);
+                    }
+                }, "json");
+            }
+        });
+    }
+
+    function fileUpload() {
+        //1创建一个formData对象
+        var formData = new FormData();
+        //2获取传入元素的val
+        var name = $("#file").val();
+        //3获取files
+        if ($("#file")[0].files.length > 0) {
+            var files = $("#file")[0].files[0];
+            //4将name 和 files 添加到formData中，键值对形式
+            formData.append("file", files);
+            formData.append("name", name);
+            $.ajax({
+                url: "file/fileUpload.action",
+                type: 'post',
+                data: formData,
+                processData: false,// ⑧告诉jQuery不要去处理发送的数据
+                contentType: false, // ⑨告诉jQuery不要去设置Content-Type请求头
+                success: function (result) {
+                    if (result.code === 200) {
+                        tale.alertOkAndReload('上传成功成功');
+                    }else if (result.code === 403) {
+                        show403();
+                    } else {
+                        tale.alertError(result.msg);
+                    }
+                }
+            });
+        }
+    }
+
 </script>
 </body>
 </html>

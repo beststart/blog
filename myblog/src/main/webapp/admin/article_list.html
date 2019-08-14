@@ -10,6 +10,7 @@
     <link href="../vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
     <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
     <link href="../vendor/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.4.1/sweetalert2.min.css" rel="stylesheet"/>
 
     <style>
         .label {
@@ -188,10 +189,159 @@
 </div>
 
 <!--所有页面必须导入start-->
-<script src="../vendor/jquery/jquery.js"></script>
+<script src="https://cdn.bootcss.com/jquery/2.2.3/jquery.min.js"></script>
 <script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.4.1/sweetalert2.min.js"></script>
 <script src="../vendor/jquery.app.js"></script>
 <script src="../vendor/base.js"></script>
 <!--所有页面必须导入end-->
+<script type="text/javascript">
+    var tale = new $.tale();
+    $(function () {
+        loadPage(1);
+    });
+
+    /**
+     * 加载分页数据
+     * @param currentPage 当前分页
+     */
+    function loadPage(currentPage) {
+        $.get('article/getAllArticle.action', "currentPage=" + currentPage, function (result) {
+            if (result.code === 200) {
+                //没有数据
+                if (result.data == null) {
+                    $("#tb_article").html("<tr><td class='text-center' colspan=\"7\">没有数据</td></tr>");
+                    return;
+                }
+
+                // 表格列表
+                var tbTxt = "";
+                for (var i = 0; i < result.data.list.length; i++) {
+                    var article = result.data.list[i];
+                    var div = "<tr>\n" +
+                        "                                    <td>" + article.id + "</td>" +
+                        "                                    <td>" + article.title + "</td>" +
+                        "                                    <td>" + new Date(article.created * 1000).toLocaleString() + "</td>" +
+                        "                                    <td>" + article.hits + "</td>" +
+                        "                                    <td ><button class='btn btn-sm btn-primary' onclick='showCategoryModel(" + article.id + ")'>所属分类</button></td>";
+
+                    //文章状态
+                    if (article.status === 'publish') {
+                        div += "<td><span class='label label-success'>已发布</span></td>";
+                    } else {
+                        div += "<td><span class='label label-default'>草稿</span></td>";
+                    }
+                    div +=
+                        "                                    <td>" +
+                        "                                        <button class='btn btn-primary btn-sm waves-effect waves-light m-b-5' onclick='editArticle(" + article.id + ")'>编辑</button>" +
+                        "                                        <button class='btn btn-danger btn-sm waves-effect waves-light m-b-5' onclick='deleteArticle(" + article.id + "," + currentPage + ")'>删除</button>" +
+                        "                                        <button class='btn btn-warning btn-sm waves-effect waves-light m-b-5' onclick='preview(" + article.id + ")'>预览</button>" +
+                        "                                    </td>" +
+                        "                                </tr>";
+                    tbTxt += div;
+                }
+                $("#tb_article").html(tbTxt);
+
+                //分页条
+                var $paging_toolbar = $("#paging_toolbar");
+                var paging_toolbarTxt = "<li class='disabled'><a href='#'>第" + result.data.currentPage + "页 / 共" + result.data.pageCount + "页</a></li>";
+
+                //如果当前是第一页，那么【上一页】按钮不可点击
+                if (currentPage === 1) {
+                    paging_toolbarTxt += "<li class='disabled'><a href='#'>上一页</a></li>";
+                } else {
+                    paging_toolbarTxt += "<li onclick='loadPage(" + (currentPage - 1) + ")'><a href='#'>上一页</a></li>";
+                }
+                //遍历生成页码
+                for (var i = result.data.pageBeginIndex; i <= result.data.pageEndIndex; i++) {
+                    if (result.data.currentPage === i) {
+                        paging_toolbarTxt += "<li onclick='loadPage(" + i + ")' class='active'><a href='#'>" + i + "</a></li>";
+                    } else {
+                        paging_toolbarTxt += "<li onclick='loadPage(" + i + ")' ><a href='#'>" + i + "</a></li>";
+                    }
+                }
+                //如果当前是最后一页，那么【下一页】按钮不可点击
+                if (currentPage === result.data.pageCount) {
+                    paging_toolbarTxt += "<li class='disabled'><a href='#'>下一页</a></li>";
+                } else {
+                    paging_toolbarTxt += "<li onclick='loadPage(" + (currentPage + 1) + ")'><a href='#'>下一页</a></li>";
+                }
+                $paging_toolbar.html(paging_toolbarTxt);
+            } else if (result.code === 403) {
+                show403();
+            } else {
+                tale.alertError(result.msg);
+            }
+        }, 'json');
+    }
+
+
+    /**
+     * 删除指定文章
+     * @param aid 文章id
+     * @param currentPage 当前页码
+     */
+    function deleteArticle(aid, currentPage) {
+        tale.alertConfirm({
+            title: '确定删除该文章吗?',
+            then: function () {
+                $.post('article/deleteById.action', "aid=" + aid, function (result) {
+                    if (result.code === 200) {
+                        //删除后直接刷新页面
+                        loadPage(currentPage);
+                    } else if (result.code === 403) {
+                        show403();
+                    } else {
+                        tale.alertError(result.msg);
+                    }
+                }, "json");
+            }
+        });
+    }
+
+    /**
+     * 显示所属分类模态框
+     * @param aid 文章id
+     */
+    function showCategoryModel(aid) {
+        $.get("category/getCategoryByArticleId.action", "aid=" + aid, function (result) {
+            if (result.code === 200) {
+                var spanTxt = "";
+                if (result.data.length > 0) {
+                    for (var i = 0; i < result.data.length; i++) {
+                        var category = result.data[i];
+                        spanTxt += "<span class='label label-success'>" + category.name + "</span>";
+                    }
+                    $("#category_list .modal-body").html(spanTxt);
+                } else {
+                    $("#category_list .modal-body").html("<span>该文章没有分类</span>");
+                }
+                $("#category_list").modal("show");
+            } else if (result.code === 403) {
+                show403();
+            } else {
+                tale.alertError(result.msg);
+            }
+        }, "json");
+    }
+
+    /**
+     * 跳转编辑文章页面
+     * @param aid 文章id
+     */
+    function editArticle(aid) {
+        location.href = "article_edit.html?aid=" + aid;
+    }
+
+    /**
+     * 跳转文章预览页面
+     * @param aid 文章id
+     */
+    function preview(aid) {
+        location.href = getRootPath() + "/post.html?aid=" + aid;
+    }
+
+
+</script>
 </body>
 </html>
