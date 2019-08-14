@@ -46,8 +46,8 @@ public class KaptchaController {
     public Result verify(String verify, HttpSession session){
         String verifyValue=session.getAttribute(Constants.KAPTCHA_SESSION_KEY).toString();
         if(verify.toUpperCase().equals(verifyValue.toUpperCase())){
-            return new Result(1,"验证码正确！");
+            return new Result(true);
         }
-        return new Result(0,"验证码有误！");
+        return new Result(false);
     }
 }
