@@ -42,7 +42,7 @@
       #{created,jdbcType=VARCHAR}, #{updated,jdbcType=VARCHAR}, #{content,jdbcType=LONGVARCHAR}
       )
   </insert>
-  <insert id="insertSelective" parameterType="com.xd.pjj.myblog.bean.Article" >
+  <insert id="insertSelective" keyProperty="id" useGeneratedKeys="true" parameterType="com.xd.pjj.myblog.bean.Article" >
     insert into article
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
