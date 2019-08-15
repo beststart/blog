@@ -1,192 +1,135 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <title>用户登录</title>
-    <meta charset="utf-8">
-    <link rel="SHORTCUT ICON" href="../static/image/logo.png">
-    <script src="../vendor/jquery/jquery.min.js"></script>
-    <script src="../vendor/base.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            font-family: "微软雅黑";
-            font-size: 12px;
-        }
-
-        .box {
-            width: 390px;
-            height: 360px;
-            border: solid 1px #ddd;
-            background: #FFF;
-            position: absolute;
-            left: 50%;
-            top: 42%;
-            margin-left: -195px;
-            margin-top: -160px;
-        }
-
-        .box h2 {
-            font-weight: normal;
-            color: #666;
-            font-size: 16px;
-            line-height: 46px;
-            height: 46px;
-            overflow: hidden;
-            text-align: center;
-            border-bottom: solid 1px #ddd;
-            background: #f7f7f7;
-        }
-
-        .input_box {
-            width: 350px;
-            padding-bottom: 15px;
-            margin: 0 auto;
-            overflow: hidden;
-        }
-
-        .input_box input {
-            float: left;
-            width: 348px;
-            height: 40px;
-            font-size: 14px;
-            border: solid 1px #ddd;
-            text-indent: 10px;
-            outline: none;
-            line-height: 40px;
-        }
-
-        .input_box button {
-            width: 350px;
-            height: 48px;
-            background: #3f89ec;
-            border: none;
-            border-radius: 2px;
-            outline: none;
-            cursor: pointer;
-            font-size: 16px;
-            color: #FFF;
-        }
-
-        #error_box {
-            height: 40px;
-            width: 350px;
-            margin: 0 auto;
-            line-height: 40px;
-            color: #fc4343;
-        }
-
-        img {
-            height: 40px;
-            width: 100px;
-        }
-    </style>
+    <title>个人博客后台管理</title>
+    <link rel="stylesheet" href="../static/plugins/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="../static/plugins/bootstrap-validator/css/bootstrapValidator.css">
+    <link rel="stylesheet" href="../static/css/login.css">
+    <link rel="icon" href="../static/image/logo.png">
 </head>
 <body>
-<!--中间登录-->
-    <div class="box">
-        <h2>登录</h2>
-        <div id="error_box"></div>
-        <div class="input_box">
-            <input type="text" id="username" value="admin" placeholder="请输入账户名" name="username"/>
-        </div>
-        <div class="input_box">
-            <input type="password" id="password" value="admin" placeholder="请输入密码" name="password"/>
-        </div>
-        <div class="input_box">
-            <input type="text" name="verify" placeholder="请输入验证码" id="verify" style="width: 248px;"/>
-            <img id="code" onclick="image(this)"
-                 class="verify_image" />
-        </div>
-        <div class="input_box">
-            <button onclick="login()">登录</button>
-            <span class="error" id="login_error"></span>
+<img src="../static/image/kakarot.jpg" alt="kakarot" id="img">
+<div class="container">
+    <div>
+        <h2>个人博客后台登录</h2>
+    </div>
+    <div class="form row">
+        <div class="form-horizontal col-md-offset-3" id="login_form">
+            <h3 class="form-title">用户登录</h3>
+            <form id="form">
+                <div class="col-md-9">
+                    <div class="form-group">
+                        <i class="glyphicon glyphicon-user icon"></i>
+                        <input class="form-control required" type="text" placeholder="请输入登录名" id="loginName"
+                               name="username" autofocus="autofocus" maxlength="20"/>
+                    </div>
+                    <div class="form-group">
+                        <i class="glyphicon glyphicon-lock icon"></i>
+                        <input class="form-control required" type="password" placeholder="请输入密码" id="password"
+                               name="password" maxlength="16"/>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-8" style="padding: 0">
+                        <i class="glyphicon glyphicon-text-color icon"></i>
+                            <input type="text" class="form-control required" name="verify" id="verify" placeholder="请输入验证码" />
+                        </div>
+                        <div class="col-md-1" style="padding: 0">
+                            <img id="code" onclick="image(this)" style="height: 34px;margin-top: 20px;" class="verify_image" />
+                        </div>
+                    </div>
+                    <div class="form-group col-md-offset-9">
+                        <button type="button" class="btn btn-success pull-right" id="loginBtn">登录</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
-
+</div>
+</body>
+<script src="../static/plugins/jquery/jquery-3.4.0.js"></script>
+<script src="../static/plugins/bootstrap/js/bootstrap.js"></script>
+<script src="../static/plugins/bootstrap-validator/js/bootstrapValidator.js"></script>
+<script src="../static/plugins/bootstrap-validator/js/language/zh_CN.js"></script>
+<script src="../static/js/base.js"></script>
 <script>
     $(function () {
         $('#code').attr("src", getRootPath() + "/kaptcha.jpg");
-    });
-    function login() {
-        var username = $('#username');
-        var password = $('#password');
-        var verify = $('#verify');
-        if (check(username,password,verify)) {
-            $.post(getRootPath() + "/admin/user/login", "username=" + username.val() + "&password=" + password.val(), function (result) {
-                if (result.code === 1) {
-                    location.href = getRootPath() + "/admin/index.html";
-                } else {
-                    var error = document.getElementById("login_error");
-                    error.innerHTML = result.msg;
-                }
-            }, "json");
-        }
-    }
-
-    /**
-     * [[登录校验函数]]
-     * @param {DOM} form [[由页面传入，表单元素]]
-     */
-    function check(username, password,verify) {
-        var error = document.getElementById("login_error");
-        return _validate(username, error, "请输入用户名") && _validate(password, error, "请输入密码")
-            && _validate(verify, error, "请输入验证码") && _checkVerify(verify, error, "验证码不正确");
-    }
-
-    /**
-     * [[校验一个元素是否为空]]
-     * @param {[[DOM]]} element [[被校验的元素]]
-     * @param {[[DOM]]} error   [[错误信息显示]]
-     * @param {[[String]]} message [[错误信息]]
-     * @returns {[[boolean]]} [[返回是否通过]]
-     */
-    function _validate(element, error, message) {
-        var ele_value = element.val().trim();
-        if (!ele_value) {
-            error.innerHTML = message;
-            element.focus();
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * ajax请求校验验证码
-     * @param {} element 验证码input元素
-     * @param {} error 错误显示span
-     * @param {} message错误提示信息
-     */
-    function _checkVerify(element, error, message) {
-        var value = element.val().trim();
-        //是否成功
-        var hasSuccess = false;
-        $.ajax({
-            type:'post',
-            url: getRootPath() + "/verify",
-            data: "verify=" + value,
-            async: false,
-            dataType: "json",
-            success: function (result) {
-                if (result.code === 1) {
-                    hasSuccess = true;
-                } else {
-                    error.innerHTML = message;
+        /*bootstrap验证插件*/
+        $('#form').bootstrapValidator({
+            /*验证状态图标设置*/
+            feedbackIcons:{
+                valid:'glyphicon glyphicon-ok',             //验证成功状态
+                invalid:'glyphicon glyphicon-remove',       //验证失败状态
+                validating:'glyphicon glyphicon-refresh'    //正在验证状态
+            },
+            /*配置要验证的属性*/
+            fields:{
+                username:{
+                    validators:{
+                        notEmpty:{
+                            message:'用户名不能为空'
+                        }
+                    }
+                },
+                password:{
+                    validators:{
+                        notEmpty:{
+                            message:'密码不能为空'
+                        }
+                    }
+                },
+                verify:{
+                    validators:{
+                        notEmpty:{
+                            message:'验证码不能为空'
+                        },
+                        threshold:4,//4个字符才开始发送ajax请求验证。
+                        remote:{/*服务端验证，返回json格式固定为：{valid:true/false}*/
+                            url:getRootPath()+'/verify',
+                            data:{
+                                verify:$('#verify').val()
+                            },
+                            message:'验证码不正确'
+                        }
+                    }
                 }
             }
         });
-        return hasSuccess;
+        $('#loginBtn').click(function () {
+            doLogin();
+        });
+        $('body').keydown(function (e) {
+            if(e.keyCode==13){
+                doLogin();
+            }
+        });
+    });
+    function doLogin() {
+        var bootstrapValidator = $("#form").data('bootstrapValidator');
+        bootstrapValidator.validate();
+        if(bootstrapValidator.isValid()){
+            $.ajax({
+                url: getRootPath()+'/admin/user/login',
+                data: $('#form').serialize(),
+                method: 'post',
+                dataType: 'json',
+                success: function (res) {
+                    console.log(res);
+                    if (res.code == 1) {
+                        location.replace(getRootPath()+'/admin/index.html');
+                    } else {
+                        alert(res.msg);
+                    }
+                },
+                error: function (err) {
+                    console.log(err);
+                    alert('与服务器连接失败，请稍后再试....');
+                }
+            });
+        }
     }
-
-    /**
-     * 换验证码
-     * @param {验证码所在的img DOM元素} image
-     */
     function image(image) {
         image.src = getRootPath() + "/kaptcha.jpg"
     }
-
-
 </script>
-</body>
 </html>
