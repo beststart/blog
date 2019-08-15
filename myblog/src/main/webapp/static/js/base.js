@@ -1,4 +1,11 @@
-
+/**
+ * 清除bootstrap模态窗的缓存
+ */
+$('.modal').on('hidden.bs.modal', function () {
+    $(this).removeData('bs.modal');//清除数据
+    $('form')[0].reset();//重置表单
+    $('form :hidden').val('');
+});
 /**
  * 获取项目根路径
  * @returns {string} http://localhost:6589/Blog_war_exploded   注意最后没有[/]

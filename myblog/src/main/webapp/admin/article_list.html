@@ -6,20 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <meta content="Coderthemes" name="author"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <link rel="shortcut icon" href="../static/image/logo.png"/>
-    <link href="../vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
-    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
-    <link href="../vendor/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="../static/image/logo.png" rel="shortcut icon"/>
+    <link href="../static/plugins/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+    <link href="../static/plugins/bootstrap-table/bootstrap-table.css" rel="stylesheet">
+    <link href="../static/plugins/font-awesome-4.7.0/css/font-awesome.css" rel="stylesheet">
+    <link href="../static/css/style.css" rel="stylesheet" type="text/css"/>
 
-    <style>
-        .label {
-            margin-left: 10px;
-        }
-
-        .table tbody tr td {
-            vertical-align: middle;
-        }
-    </style>
 </head>
 <body class="fixed-left">
 <div id="wrapper">
@@ -115,48 +107,37 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-12">
-                        <table class="table table-bordered">
-                            <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>文章标题</th>
-                                <th>发布时间</th>
-                                <th>浏览量</th>
-                                <th>所属分类</th>
-                                <th>发布状态</th>
-                                <th>操作</th>
-                            </tr>
-                            </thead>
-                            <tbody id="tb_article">
-                            <tr>
-                                <td>1</td>
-                                <td>Spring入门指南</td>
-                                <td>2019年4月22日11:29:39</td>
-                                <td>48</td>
-                                <td>
-                                    <button class="btn btn-primary">所属分类</button>
-                                </td>
-                                <td>已发布</td>
-                                <td>
-                                    <button class="btn btn-primary btn-sm waves-effect waves-light m-b-5">编辑</button>
-                                    <button class="btn btn-danger btn-sm waves-effect waves-light m-b-5">编辑</button>
-                                    <button class="btn btn-warning btn-sm waves-effect waves-light m-b-5">预览</button>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                        <nav class="pull-right">
-                            <ul class="pagination" id="paging_toolbar">
-                                <li><a href="#" aria-label="Previous"><span aria-hidden="true">上一页</span></a></li>
-                                <li class="active"><a href="#">1<span class="sr-only">(current)</span></a></li>
-                                <li class=""><a href="#">2<span class="sr-only">(current)</span></a></li>
-                                <li class=""><a href="#">3<span class="sr-only">(current)</span></a></li>
-                                <li class=""><a href="#">4<span class="sr-only">(current)</span></a></li>
-                                <li class=""><a href="#">5<span class="sr-only">(current)</span></a></li>
-                                <li class="disabled"><a href="#" aria-label="Previous"><span
-                                        aria-hidden="true">下一页</span></a></li>
-                            </ul>
-                        </nav>
+                        <div class="panel panel-default" style="margin-top: 5px">
+                            <div class="panel-heading">查询条件</div>
+                            <div class="panel-body">
+                                <form id="formSearch" class="form-inline">
+                                    <div class="form-group">
+                                        <label class="control-label" for="title">文章标题</label>
+                                        <input type="text" class="form-control" id="title" placeholder="请输入文章标题">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label" for="status">文章状态</label>
+                                        <select id="status" class="form-control">
+                                            <option value="">[请选择]</option>
+                                                <option value="1">发表</option>
+                                                <option value="2">草稿</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="created" class="control-label">发表时间</label>
+                                        <input type="text" id="created" class="form-control" style="width: 200px;" placeholder="请选择时间范围">
+                                    </div>
+                                    <div class="form-group" style="text-align:left;">
+                                        <button type="button" style="margin-left:10px" id="btn_query" class="btn btn-primary">查询</button>
+                                        <button type="button" style="margin-left:10px" id="btn_clear" class="btn btn-primary">清空</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div id="toolbar">
+                            <a href="article_edit.html" class="btn btn-sm btn-success">发表文章</a>
+                        </div>
+                        <table id="infoTable"></table>
                     </div>
                 </div>
                 <div>
@@ -174,8 +155,8 @@
                                     aria-hidden="true">&times;</span></button>
                             <h4 class="modal-title">文章所属分类</h4>
                         </div>
-                        <div class="modal-body" id="">
-                            <span class="label label-success">分类1</span>
+                        <div class="modal-body" id="categoryBody">
+
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-sm btn-default" data-dismiss="modal">关闭</button>
@@ -188,10 +169,135 @@
 </div>
 
 <!--所有页面必须导入start-->
-<script src="../vendor/jquery/jquery.js"></script>
-<script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
-<script src="../vendor/jquery.app.js"></script>
-<script src="../vendor/base.js"></script>
+<script src="../static/plugins/jquery/jquery-3.4.0.js"></script>
+<script src="../static/plugins/bootstrap/js/bootstrap.js"></script>
+<script src="../static/plugins/jquery/jquery.app.js"></script>
+<script src="../static/js/base.js"></script>
 <!--所有页面必须导入end-->
+<script src="../static/plugins/bootstrap-table/bootstrap-table.js"></script>
+<script src="../static/plugins/bootstrap-table/bootstrap-table-zh-CN.js"></script>
+<script src="../static/plugins/laydate/laydate.js"></script>
+<script>
+    $(function () {
+        laydate.render({
+            elem: '#created'
+            ,range: true
+        });
+        /*初始化表格*/
+        $('#infoTable').bootstrapTable({
+            url: getRootPath()+'/admin/article/getPage',
+            method: 'get',
+            striped: true,                  //隔行换色
+            cache: false,                   //是否缓存，默认true
+            sidePagination: 'server',       //服务端分页
+            pageNumber: 1,                  //默认加载第一页
+            pagination: true,               //是否显示分页
+            pageSize: 5,                    //每页显示条数
+            pageList:[5,10,20,30,50],       //可供选择的每页行数
+            showRefresh: true,              //是否显示刷新按钮
+            clickToSelect: true,            //是否启用点击选中行
+            // height: 500,                 //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+            uniqueId: "id",                 //每一行的唯一标识，一般为主键列
+            showToggle: true,               //是否显示详细视图和列表视图的切换按钮
+            cardView: false,                //是否显示详细视图
+            toolbar: '#toolbar',            //工具按钮用哪个容器
+            columns: [{
+                field: 'id',
+                title: '编号'
+            }, {
+                field: 'title',
+                title: '文章标题',
+                formatter: titleFun
+            }, {
+                field: 'intro',
+                title: '文章简介',
+                formatter: introFun
+            },{
+                field:'created',
+                title:'发表时间'
+            },{
+                field:'status',
+                title:'发布状态',
+                formatter: statusFun
+            },{
+                field:'category',
+                title:'所属分类',
+                formatter: categoryFun
+            },{
+                field: 'opt',
+                title: '操作',
+                formatter: optFun
+            }]
+        });
+        $('#btn_query').click(function () {
+            $('#infoTable').bootstrapTable('refresh', {
+                query: {
+                    title: $('#title').val(),
+                    intro: $('#intro').val(),
+                    status:$('#status').val(),
+                    created:$('#created').val()
+                }
+            });
+        });
+        $('#btn_clear').click(function () {
+            $('input,select').val('');
+        });
+    });
+
+    function titleFun(value) {
+        var str=value;
+        if(str.length>12){
+            str=str.substring(0,12)+'...';
+        }
+        return '<span title="'+value+'">'+str+'</span>';
+    }
+    function introFun(value) {
+        var str=value;
+        if(str.length>12){
+            str=str.substring(0,12)+'...';
+        }
+        return '<span title="'+value+'">'+str+'</span>';
+    }
+    function statusFun(value) {
+        if(value==1){
+            return '发表';
+        }
+        if(value==2){
+            return '草稿';
+        }
+        return '异常';
+    }
+    function categoryFun(value,row) {
+        return '<button type="button" class="btn btn-primary" onclick="showCategoryList('+row.id+');">所属分类</button>';
+    }
+    function optFun(value,row) {
+        return '<a href="article_edit.html?aid='+row.id+'" class="btn btn-primary">编辑</a> <button type="button" class="btn btn-danger" onclick="deleteInfo('+row.id+')">删除</button> <button type="button" class="btn btn-warning">预览</button>';
+    }
+    function showCategoryList(id) {
+        $.ajax({
+            url:getRootPath()+'/admin/article/getCategoryByAid',
+            data:{aid:id},
+            method:'get',
+            dataType:'json',
+            success:function (res) {
+                var html='';
+                for(var i=0;i<res.length;i++){
+                    html+='<span class="label label-success">'+res[i].cname+'</span> ';
+                }
+                $('#categoryBody').empty().append(html);
+                $('#category_list').modal('show');
+            },
+            error:function (e) {
+                console.log(e);
+                alert('与服务器连接失败，请稍后再试...');
+            }
+        });
+    }
+    function deleteInfo(id) {
+        if(confirm('确定删除本记录吗？')){
+            alert(id);
+        }
+    }
+</script>
 </body>
 </html>

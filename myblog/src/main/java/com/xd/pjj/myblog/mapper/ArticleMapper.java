@@ -2,6 +2,8 @@ package com.xd.pjj.myblog.mapper;
 
 import com.xd.pjj.myblog.bean.Article;
 
+import java.util.List;
+
 public interface ArticleMapper {
     int deleteByPrimaryKey(Integer id);
 
@@ -16,4 +18,6 @@ public interface ArticleMapper {
     int updateByPrimaryKeyWithBLOBs(Article record);
 
     int updateByPrimaryKey(Article record);
+
+    List<Article> getAll(Article article);
 }

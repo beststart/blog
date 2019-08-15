@@ -66,4 +66,26 @@
       cid = #{cid,jdbcType=INTEGER}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+    <insert id="batchInsert" parameterType="list">
+        insert into category_article(aid,cid) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.aid},#{item.cid})
+        </foreach>
+    </insert>
+
+    <delete id="batchDelete" parameterType="int[]">
+        delete from category_article where id in
+        <foreach collection="array" separator="," item="id" open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteByAid" parameterType="int">
+        delete from category_article where aid=#{aid}
+    </delete>
+
+    <select id="getByAid" parameterType="int" resultType="CategoryArticle">
+        select ca.*,c.name cname from category_article ca,category c where ca.cid=c.id and ca.aid=#{aid}
+    </select>
 </mapper>

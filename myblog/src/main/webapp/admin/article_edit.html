@@ -7,15 +7,17 @@
     <meta content="Coderthemes" name="author"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <link rel="shortcut icon" href="../static/image/logo.png"/>
-    <link href="../vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
-    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
-    <link href="../vendor/css/style.css" rel="stylesheet" type="text/css"/>
-
-    <link href="../vendor/tagsinput/jquery.tagsinput.css" rel="stylesheet"/>
-    <link href="../vendor/select2.dist.css/select2-bootstrap.css" rel="stylesheet"/>
-    <link href="../vendor/toggles/toggles.css" rel="stylesheet"/>
-    <link href="https://cdn.bootcss.com/select2/3.4.8/select2.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../vendor/editor/css/editormd.css"/>
+    <link href="../static/plugins/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+    <link href="../static/plugins/font-awesome-4.7.0/css/font-awesome.css" rel="stylesheet"/>
+    <link href="../static/css/style.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="../static/plugins/editor/css/editormd.css"/>
+    <link rel="stylesheet" href="../static/plugins/select2/css/select2.css">
+    <link rel="stylesheet" href="../static/plugins/bootstrap-validator/css/bootstrapValidator.css">
+    <style>
+        .errorStyle{
+            border: 1px solid red;
+        }
+    </style>
 </head>
 
 <body class="fixed-left">
@@ -69,7 +71,7 @@
                             </a>
                         </li>
                         <li>
-                            <a id="article_edit" href="article_edit.html?type=newArticle" class="waves-effect active">
+                            <a id="article_edit" href="article_edit.html" class="waves-effect active">
                                 <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                                 <span> 发布文章 </span>
                             </a>
@@ -108,41 +110,25 @@
             <div class="container">
                 <div class="row">
                     <div class="col-sm-12">
-                        <h4 class="page-title">发布文章</h4>
+                        <h4 class="page-title">发布文章<span id="articleType"></span></h4>
                     </div>
                     <div class="col-md-12">
-                        <form id="articleForm" role="form" novalidate="novalidate">
-                            <input type="hidden" name="categories" id="categories"/>
+                        <form id="articleForm">
                             <input type="hidden" name="cid" id="cid"/>
-                            <input type="hidden" name="status" id="status"/>
-                            <input type="hidden" name="allowComment" id="allowComment"/>
-                            <input type="hidden" name="allowPing" id="allowPing"/>
-                            <input type="hidden" name="allowFeed" id="allowFeed"/>
-                            <input type="hidden" name="content" id="content-editor"/>
-
                             <div class="form-group col-md-6" style="padding: 0 10px 0 0;">
-                                <input id="article_title" type="text" class="form-control" placeholder="请输入文章标题（必须）"
-                                       name="title"
-                                       required="required"
-                                       aria-required="true"/>
+                                <input id="title" type="text" class="form-control" placeholder="请输入文章标题（必须）" name="title"/>
                             </div>
 
 
                             <div class="form-group col-md-6">
-                                <select id="sel_category" class="select2 form-control" multiple="multiple"
-                                        data-placeholder="请选择分类...">
-                                    <option value="默认分类">默认分类</option>
+                                <select id="sel_category" name="sel_category" class="select2" multiple="multiple" data-placeholder="请选择分类...">
                                 </select>
                             </div>
 
                             <div class="form-group col-md-12" style="padding: 0 10px 0 0;">
-                                <textarea id="article_intro" type="text" class="form-control" placeholder="请输入文章简介（必须）"
-                                          required="required"
-                                          aria-required="true"></textarea>
+                                <textarea id="intro" type="text" class="form-control" placeholder="请输入文章简介（必须）" name="intro"></textarea>
                             </div>
-
                             <div id="post_edit_layout">
-                                <textarea style="display:none;"></textarea>
                             </div>
                             <div class="form-group col-md-3 col-sm-4">
                                 <label class="col-sm-4">开启评论</label>
@@ -154,11 +140,11 @@
                             <div class="text-right">
                                 <a class="btn btn-default waves-effect waves-light" href="article_list.html">返回列表</a>
                                 <button type="button" class="btn btn-primary waves-effect waves-light"
-                                        onclick="subArticle('publish');">
-                                    保存文章
+                                        onclick="subArticle(1);">
+                                    发表文章
                                 </button>
                                 <button type="button" class="btn btn-warning waves-effect waves-light"
-                                        onclick="subArticle('draft');">
+                                        onclick="subArticle(2);">
                                     存为草稿
                                 </button>
                             </div>
@@ -177,33 +163,178 @@
     </div>
 </div>
 <!--所有页面必须导入start-->
-<script src="../vendor/jquery/jquery.min.js"></script>
-<script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
-<script src="../vendor/jquery.app.js"></script>
+<script src="../static/plugins/jquery/jquery-3.4.0.js"></script>
+<script src="../static/plugins/bootstrap/js/bootstrap.js"></script>
+<script src="../static/plugins/jquery/jquery.app.js"></script>
+<script src="../static/js/base.js"></script>
 <!--所有页面必须导入end-->
-
-
-<script src="../vendor/tagsinput/jquery.tagsinput.min.js"></script>
-<script src="../vendor/jquery-multi-select/jquery.quicksearch.js"></script>
-
-<script src="../vendor/editor/editormd.js"></script>
-
-<script src="https://cdn.bootcss.com/bootstrap-multiselect/0.9.12/js/bootstrap-multiselect.min.js"></script>
-<script src="https://cdn.bootcss.com/select2/3.4.8/select2.min.js"></script>
-<script src="https://cdn.bootcss.com/jquery-toggles/2.0.4/toggles.min.js"></script>
-
+<script src="../static/plugins/editor/editormd.js"></script>
+<script src="../static/plugins/select2/js/select2.js"></script>
+<script src="../static/plugins/bootstrap-validator/js/bootstrapValidator.js"></script>
+<script src="../static/plugins/bootstrap-validator/js/language/zh_CN.js"></script>
 
 <script>
-    $(".select2").select2({
-        width: '100%'
-    });
-    editormd("post_edit_layout", {
+    /*初始化富文本框*/
+    var md=editormd("post_edit_layout", {
         width: "100%",
         height: 640,
         syncScrolling: "single",
         path: "../vendor/editor/lib/"
     });
+    $(function () {
+        var selectData;
+        $.ajax({
+            url:getRootPath()+'/admin/category/getAll',
+            method:'get',
+            dataType:'json',
+            async:false,
+            success:function (res) {
+                var arr = [];
+                for(var i =0;i<res.length;i++){
+                    var data=new Object();
+                    data.id=res[i].id;
+                    data.text=res[i].name || res[i].text;
+                    arr.push(data);
+                }
+                selectData=arr;
+            }
+        });
+        /*初始化下拉框*/
+        $("#sel_category").select2({
+            width: '100%',
+            data:selectData
+        });
+        /*初始化表单验证*/
+        $('#articleForm').bootstrapValidator({
+            /*验证状态图标设置*/
+            feedbackIcons:{
+                valid:'glyphicon glyphicon-ok',             //验证成功状态
+                invalid:'glyphicon glyphicon-remove',       //验证失败状态
+                validating:'glyphicon glyphicon-refresh'    //正在验证状态
+            },
+            /*配置要验证的属性*/
+            fields:{
+                title:{
+                    validators:{
+                        notEmpty:{
+                            message:'分类名称不能为空'
+                        }
+                    }
+                },
+                sel_category:{
+                    validators:{
+                        notEmpty:{
+                            message:'至少选择一个分类'
+                        }
+                    }
+                },
+                intro:{
+                    validators:{
+                        notEmpty:{
+                            message:'文章简介不能为空'
+                        }
+                    }
+                }
+            }
+        });
+        /*清除富文本编辑器的错误样式*/
+        $('#post_edit_layout').click(function () {
+            $(this).removeClass('errorStyle').next('span').empty();
+        });
+        var aid=getUrlParam('aid');
+        /*aid文章id如果有值，表示修改文章*/
+        if(aid){
+            /*获取文章信息*/
+            $.ajax({
+                url:getRootPath()+'/admin/article/getById',
+                data:{id:aid},
+                method:'get',
+                dataType:'json',
+                success:function (res) {
+                    $('#cid').val(res.id);
+                    $('#title').val(res.title);
+                    $('#intro').val(res.intro);
+                    $('#allow_comments').prop('checked',res.comment==1);
+                    md=editormd("post_edit_layout", {
+                        markdown:res.content,
+                        width: "100%",
+                        height: 640,
+                        syncScrolling: "single",
+                        path: "../vendor/editor/lib/"
+                    });
 
+                    if(res.status==1){
+                        $('#articleType').text('（已发布）');
+                    }else{
+                        $('#articleType').text('（草稿）');
+                    }
+                },
+                error:function (e) {
+                    alert('获取文章信息失败,请稍后再试...');
+                    console.log(e);
+                }
+            });
+            /*获取分类信息*/
+            $.ajax({
+                url:getRootPath()+'/admin/article/getCategoryByAid',
+                data:{aid:aid},
+                method:'get',
+                dataType:'json',
+                success:function (res) {
+                    var arr=[];
+                    for(var i=0;i<res.length;i++){
+                        arr.push(res[i].cid+'');
+                    }
+                    $("#sel_category").val(arr).trigger('change');
+                },
+                error:function (e) {
+                    alert('获取分类信息失败，请稍后再试...');
+                    console.log(e);
+                }
+            });
+        }
+    });
+    function subArticle(status) {
+        /*获取验证表单*/
+        var bootstrapValidator = $("#articleForm").data('bootstrapValidator');
+        /*启用验证*/
+        bootstrapValidator.validate();
+        /*判断验证是否全部通过*/
+        if(bootstrapValidator.isValid()){
+            var id=$('#cid').val();
+            var title=$('#title').val();
+            var sel_category=$('#sel_category').val();
+            var intro=$('#intro').val();
+            var comment=$('#allow_comments')[0].checked?1:0;
+            var content=md.getMarkdown();
+            if(!content){
+                $('#post_edit_layout').addClass('errorStyle').after('<span style="color: red">请输入文章内容</span>');
+                return;
+            }
+            $.ajax({
+                url:getRootPath()+'/admin/article/update',
+                data:{
+                    id:id,
+                    title:title,
+                    sel_category:sel_category.toString(),
+                    intro:intro,
+                    comment:comment,
+                    content:content,
+                    status:status
+                },
+                method:'post',
+                dataType:'json',
+                success:function (res) {
+                    if(res.code>1){
+                        alert('操作成功！');
+                        location.replace(getRootPath()+'/admin/article_list.html');
+                    }else{
+                        alert('操作失败！');
+                    }
+                }
+            });
+        }
+    }
 </script>
 </body>
 </html>

@@ -2,6 +2,8 @@ package com.xd.pjj.myblog.mapper;
 
 import com.xd.pjj.myblog.bean.CategoryArticle;
 
+import java.util.List;
+
 public interface CategoryArticleMapper {
     int deleteByPrimaryKey(Integer id);
 
@@ -14,4 +16,12 @@ public interface CategoryArticleMapper {
     int updateByPrimaryKeySelective(CategoryArticle record);
 
     int updateByPrimaryKey(CategoryArticle record);
+
+    int batchInsert(List<CategoryArticle> list);
+
+    int batchDelete(Integer[] ids);
+
+    int deleteByAid(int aid);
+
+    List<CategoryArticle> getByAid(int aid);
 }
