@@ -30,7 +30,8 @@ function logout() {
 }
 
 function show403() {
-    tale.alertError("请先登录");
+    alert('请先登录！');
+    location.replace(getRootPath()+'/admin/login.html');
 }
 
 //获取url中的参数

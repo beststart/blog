@@ -7,9 +7,10 @@
     <meta content="Coderthemes" name="author"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <link rel="shortcut icon" href="../static/image/logo.png"/>
-    <link href="../vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
-    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
-    <link href="../vendor/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="../static/plugins/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+    <link href="../static/plugins/font-awesome-4.7.0/css/font-awesome.css" rel="stylesheet"/>
+    <link href="../static/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="../static/plugins/webuploader/webuploader.css" rel="stylesheet" type="text/css"/>
 </head>
 <style>
 
@@ -126,13 +127,7 @@
                 <div class="row">
                     <div class="row">
                         <div class="col-md-12">
-                            <form class="form-horizontal" method="post" enctype="multipart/form-data">
-                                <div class="form-inline">
-                                    <input type="file" id="file" class="form-control" name="fileName"
-                                           placeholder="请选择文件">
-                                    <input type="button" class="btn btn-success" onclick="fileUpload()" value="上传文件">
-                                </div>
-                            </form>
+                            <div id="filePicker">选择图片</div>
                         </div>
                         <div class="col-md-12">
                             <div id="images_list">
@@ -185,38 +180,30 @@
     </div>
 </div>
 <!--所有页面必须导入start-->
-<script src="../vendor/jquery/jquery.js"></script>
-<script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
-<script src="../vendor/jquery.app.js"></script>
-<script src="../vendor/base.js"></script>
+<script src="../static/plugins/jquery/jquery-3.4.0.js"></script>
+<script src="../static/plugins/bootstrap/js/bootstrap.js"></script>
+<script src="../static/plugins/jquery/jquery.app.js"></script>
+<script src="../static/js/base.js"></script>
 <!--所有页面必须导入end-->
-<script type="text/javascript">
-    $("#dropzone").dropzone({
-        paramName: "file",
-        url: "/admin/attach/upload",
-        maxFilesize: 1,
-        init: function () {
-            this.on("success", function (file, msg) {
-                console.log(file);
-                if (msg.success !== true) {
-                    tale.alertError('上传文件大于1M');
-                }
-                setTimeout(function () {
-                    window.location.reload();
-                }, 200);
-            });
+<script src="../static/plugins/webuploader/webuploader.js"></script>
+<script>
+    // 初始化Web Uploader
+    var uploader = WebUploader.create({
+        // 选完文件后，是否自动上传。
+        auto: false,
+        // 文件接收服务端。
+        server: 'upload',
+        // 选择文件的按钮。可选。
+        // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+        pick: '#filePicker',
+        //允许重复上传
+        duplicate :true,
+        // 只允许选择图片文件。
+        accept: {
+            title: 'Images',
+            extensions: 'gif,jpg,jpeg,bmp,png',
+            mimeTypes: 'image/*'
         }
-    });
-    var clipboard = new Clipboard('button.copy', {
-        text: function (trigger) {
-            return $(trigger).attr('url');
-        }
-    });
-    clipboard.on('success', function (e) {
-        console.info('Action:', e.action);
-        console.info('Text:', e.text);
-        console.info('Trigger:', e.trigger);
-        e.clearSelection();
     });
 </script>
 </body>

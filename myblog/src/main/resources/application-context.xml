@@ -90,7 +90,17 @@
     </mvc:annotation-driven>
 
     <mvc:default-servlet-handler/>
-
+    
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/admin/**"/>
+            <mvc:exclude-mapping path="/admin/login.html"/>
+            <mvc:exclude-mapping path="/admin/user/*"/>
+            <mvc:exclude-mapping path="/verify*"/>
+            <mvc:exclude-mapping path="/error/*"/>
+            <bean class="com.xd.pjj.myblog.interceptor.LoginInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
 
 
 

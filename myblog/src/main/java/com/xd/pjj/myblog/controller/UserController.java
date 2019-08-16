@@ -9,17 +9,21 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 @RequestMapping("/admin/user")
 @Controller
+@ResponseBody
 public class UserController {
 
     @Autowired
     private UserService userService;
 
     @RequestMapping("/login")
-    @ResponseBody
     public Result login(User user, HttpSession session){
         user.setPassword(MD5Util.MD5(user.getPassword()));
         user=userService.login(user);
@@ -32,9 +36,25 @@ public class UserController {
     }
 
     @RequestMapping("/logout")
-    @ResponseBody
     public Result logout(HttpSession session){
         session.removeAttribute("loginInfo");
         return new Result(1);
+    }
+
+    @RequestMapping("/getImg")
+    public List<Result> getImg(HttpServletRequest request){
+        /*获取项目地址*/
+        String basePath = request.getScheme() + "://" + request.getServerName()
+                + ":" + request.getServerPort() + request.getContextPath()
+                + "/";
+        /*获取绝对地址*/
+        String uploadPath=request.getServletContext().getRealPath("/upload");
+        File file=new File(uploadPath);
+        String[] fs=file.list();
+        List<Result> list=new ArrayList<>();
+        for(int i=0;i<fs.length;i++){
+            list.add(new Result(i,basePath+"upload/"+fs[i]));
+        }
+        return list;
     }
 }
