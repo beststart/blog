@@ -1,5 +1,7 @@
 package com.xd.pjj.myblog.util;
 
+import com.github.pagehelper.PageInfo;
+
 import java.util.List;
 
 public class Result {
@@ -8,6 +10,7 @@ public class Result {
     private Boolean valid;
     private Long total;
     private List rows;
+    private PageInfo pageInfo;
 
     public Result() {
     }
@@ -28,6 +31,20 @@ public class Result {
     public Result(Long total, List rows) {
         this.total = total;
         this.rows = rows;
+    }
+
+    public Result(Long total, List rows, PageInfo pageInfo) {
+        this.total = total;
+        this.rows = rows;
+        this.pageInfo = pageInfo;
+    }
+
+    public PageInfo getPageInfo() {
+        return pageInfo;
+    }
+
+    public void setPageInfo(PageInfo pageInfo) {
+        this.pageInfo = pageInfo;
     }
 
     public Integer getCode() {

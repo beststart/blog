@@ -65,17 +65,16 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public Result getPage(int offset, int limit, Article article) {
+    public Result getPage(int page, int limit, Article article) {
         if(StringUtils.isNotEmpty(article.getCreated())){
             String[] time=article.getCreated().split(" - ");
             article.setCreated(time[0]);
             article.setUpdated(time[1]);
         }
-        int page=offset/limit+1;
         PageHelper.startPage(page,limit);
         List<Article> list=articleMapper.getAll(article);
         PageInfo<Article> pageInfo=new PageInfo<>(list);
-        return new Result(pageInfo.getTotal(),list);
+        return new Result(pageInfo.getTotal(),list,pageInfo);
     }
 
     @Override

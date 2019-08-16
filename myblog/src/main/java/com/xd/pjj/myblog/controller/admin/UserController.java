@@ -1,4 +1,4 @@
-package com.xd.pjj.myblog.controller;
+package com.xd.pjj.myblog.controller.admin;
 
 import com.xd.pjj.myblog.bean.User;
 import com.xd.pjj.myblog.service.UserService;
@@ -41,20 +41,4 @@ public class UserController {
         return new Result(1);
     }
 
-    @RequestMapping("/getImg")
-    public List<Result> getImg(HttpServletRequest request){
-        /*获取项目地址*/
-        String basePath = request.getScheme() + "://" + request.getServerName()
-                + ":" + request.getServerPort() + request.getContextPath()
-                + "/";
-        /*获取绝对地址*/
-        String uploadPath=request.getServletContext().getRealPath("/upload");
-        File file=new File(uploadPath);
-        String[] fs=file.list();
-        List<Result> list=new ArrayList<>();
-        for(int i=0;i<fs.length;i++){
-            list.add(new Result(i,basePath+"upload/"+fs[i]));
-        }
-        return list;
-    }
 }

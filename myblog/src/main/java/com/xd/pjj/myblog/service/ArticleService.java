@@ -9,9 +9,8 @@ import java.util.List;
 
 public interface ArticleService {
     Result update(Article article,Integer[] sel_category);
-    Result getPage(int offset,int limit,Article article);
-
+    Result getPage(int page,int limit,Article article);
     List<CategoryArticle> getCategoryByAid(Integer aid);
-
     Article getById(Integer id);
+
 }

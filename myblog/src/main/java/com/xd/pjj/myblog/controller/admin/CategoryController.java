@@ -1,4 +1,4 @@
-package com.xd.pjj.myblog.controller;
+package com.xd.pjj.myblog.controller.admin;
 
 import com.xd.pjj.myblog.bean.Category;
 import com.xd.pjj.myblog.service.CategoryService;

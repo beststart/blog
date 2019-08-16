@@ -86,7 +86,7 @@
                             </a>
                         </li>
                         <li>
-                            <a id="article_edit" href="article_edit.html?type=newArticle" class="waves-effect">
+                            <a id="article_edit" href="article_edit.html" class="waves-effect">
                                 <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                                 <span> 发布文章 </span>
                             </a>
@@ -127,46 +127,13 @@
                 <div class="row">
                     <div class="row">
                         <div class="col-md-12">
-                            <div id="filePicker">选择图片</div>
+                            <div id="filePicker">上传图片</div>
                         </div>
                         <div class="col-md-12">
                             <div id="images_list">
-                                <div class="col-md-2 text-center">
-                                    <a href="#" target="_blank">
-                                        <img class="attach-img" src=""/>
-                                    </a>
-                                    <div class="clearfix m-t-10">
-                                        <span class="attach-text" data-toggle="tooltip" data-placement="top">图片标题</span>
-                                    </div>
-                                    <div class="clearfix">
-                                        <button type="button"
-                                                class="btn btn-warning btn-sm waves-effect waves-light copy">
-                                            <i class="fa fa-copy"></i> <span>复制</span>
-                                        </button>
-                                        <button type="button"
-                                                class="btn btn-danger btn-sm waves-effect waves-light"
-                                                onclick="'delAttach('+${attach.id}+');'">
-                                            <i class="fa fa-trash-o"></i> <span>删除</span>
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
-
                         </div>
-                        <nav class="pull-right">
-                            <ul class="pagination" id="paging_toolbar">
-                                <li><a href="#" aria-label="Previous"><span aria-hidden="true">上一页</span></a></li>
-                                <li class="active"><a href="#">1<span class="sr-only">(current)</span></a></li>
-                                <li class=""><a href="#">2<span class="sr-only">(current)</span></a></li>
-                                <li class=""><a href="#">3<span class="sr-only">(current)</span></a></li>
-                                <li class=""><a href="#">4<span class="sr-only">(current)</span></a></li>
-                                <li class=""><a href="#">5<span class="sr-only">(current)</span></a></li>
-                                <li class="disabled"><a href="#" aria-label="Previous"><span
-                                        aria-hidden="true">下一页</span></a></li>
-                            </ul>
-                        </nav>
                     </div>
-
                 </div>
                 <!--页脚-->
                 <div>
@@ -186,13 +153,14 @@
 <script src="../static/js/base.js"></script>
 <!--所有页面必须导入end-->
 <script src="../static/plugins/webuploader/webuploader.js"></script>
+<script src="../static/plugins/clipboard/clipboard.js"></script>
 <script>
     // 初始化Web Uploader
     var uploader = WebUploader.create({
         // 选完文件后，是否自动上传。
-        auto: false,
+        auto: true,
         // 文件接收服务端。
-        server: 'upload',
+        server: getRootPath()+'/admin/image/upload',
         // 选择文件的按钮。可选。
         // 内部根据当前运行是创建，可能是input元素，也可能是flash.
         pick: '#filePicker',
@@ -205,6 +173,79 @@
             mimeTypes: 'image/*'
         }
     });
+    uploader.on('uploadSuccess',function (file,res) {
+        if(res.code==1){
+            loadImgList();
+        }
+    });
+
+    var clipboard = new ClipboardJS('button.copy', {
+        text: function (trigger) {
+            return $(trigger).attr('url');
+        }
+    });
+
+    clipboard.on('success', function (e) {
+        alert('复制成功！');
+        e.clearSelection();
+    });
+
+    $(function () {
+        loadImgList();
+    });
+    function deleteImg(imgName) {
+        if(confirm('确定删除这张图片吗？')){
+            $.ajax({
+                url:getRootPath()+'/admin/image/deleteImg',
+                data:{imgName:imgName},
+                method:'post',
+                dataType:'json',
+                success:function (res) {
+                    if(res.code==1){
+                        alert('删除成功！');
+                        loadImgList();
+                    }else if(res.code==0){
+                        alert('删除失败！');
+                    }else{
+                        show403();
+                    }
+                }
+            });
+        }
+    }
+    function loadImgList() {
+        $.ajax({
+            url:getRootPath()+"/admin/image/getImgList",
+            method:'get',
+            dataType:'json',
+            success:function (res) {
+                if(res.code==403){
+                    show403();
+                }else{
+                    var html='';
+                    for(var i = 0;i<res.length;i++){
+                        html+='<div class="col-md-2 text-center">';
+                        html+='<a href="'+getRootPath()+'/upload/'+res[i].msg+'" target="_blank">';
+                        html+='<img class="attach-img" src="'+getRootPath()+'/upload/'+res[i].msg+'"/>';
+                        html+='</a>';
+                        html+='<div class="clearfix">';
+                        html+='<button type="button" url="'+getRootPath()+'/upload/'+res[i].msg+'" class="btn btn-warning btn-sm waves-effect waves-light copy">';
+                        html+='<i class="fa fa-copy"></i> <span>复制</span>';
+                        html+='</button> ';
+                        html+='<button type="button" onclick="deleteImg(\''+res[i].msg+'\');" class="btn btn-danger btn-sm waves-effect waves-light">';
+                        html+='<i class="fa fa-trash-o"></i> <span>删除</span>';
+                        html+=' </button>';
+                        html+='</div></div>';
+                    }
+                    $('#images_list').empty().append(html);
+                }
+            },
+            error:function (e) {
+                alert('获取图片列表失败，请稍后再试...');
+                console.log(e);
+            }
+        });
+    }
 </script>
 </body>
 </html>

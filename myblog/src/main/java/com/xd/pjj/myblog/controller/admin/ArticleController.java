@@ -1,4 +1,4 @@
-package com.xd.pjj.myblog.controller;
+package com.xd.pjj.myblog.controller.admin;
 
 import com.xd.pjj.myblog.bean.Article;
 import com.xd.pjj.myblog.bean.CategoryArticle;
@@ -25,7 +25,8 @@ public class ArticleController {
 
     @RequestMapping("/getPage")
     public Result getPage(Integer offset,Integer limit,Article article){
-        return articleService.getPage(offset,limit,article);
+        int page=offset/limit+1;
+        return articleService.getPage(page,limit,article);
     }
 
     @RequestMapping("/getCategoryByAid")
