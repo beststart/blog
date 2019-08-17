@@ -39,4 +39,9 @@ public class ArticleController {
         return articleService.getById(id);
     }
 
+    @RequestMapping("/delete")
+    public Result delete(Integer id){
+        return articleService.delete(id);
+    }
+
 }

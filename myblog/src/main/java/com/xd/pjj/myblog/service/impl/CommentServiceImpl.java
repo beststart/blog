@@ -40,4 +40,9 @@ public class CommentServiceImpl implements CommentService {
     public Result delete(Integer id) {
         return new Result(commentMapper.deleteByPrimaryKey(id));
     }
+
+    @Override
+    public Comment getById(Integer id) {
+        return commentMapper.selectByPrimaryKey(id);
+    }
 }

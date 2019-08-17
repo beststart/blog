@@ -274,7 +274,7 @@
         return '<button type="button" class="btn btn-primary" onclick="showCategoryList('+row.id+');">所属分类</button>';
     }
     function optFun(value,row) {
-        return '<a href="article_edit.html?aid='+row.id+'" class="btn btn-primary">编辑</a> <button type="button" class="btn btn-danger" onclick="deleteInfo('+row.id+')">删除</button> <button type="button" class="btn btn-warning">预览</button>';
+        return '<a href="article_edit.html?aid='+row.id+'" class="btn btn-primary">编辑</a> <button type="button" class="btn btn-danger" onclick="deleteInfo('+row.id+')">删除</button> <a href="../post.html?aid='+row.id+'" target="_blank" class="btn btn-warning">预览</a>';
     }
     function showCategoryList(id) {
         $.ajax({
@@ -298,7 +298,24 @@
     }
     function deleteInfo(id) {
         if(confirm('确定删除本记录吗？')){
-            alert(id);
+            $.ajax({
+                url:getRootPath()+'/admin/article/delete',
+                data:{id:id},
+                method:'post',
+                dataType:'json',
+                success:function (res) {
+                    if(res.code>0){
+                        alert('删除成功！');
+                        $('#infoTable').bootstrapTable('refresh');
+                    }else{
+                        alert('删除失败！');
+                    }
+                },
+                error:function (e) {
+                    alert('删除数据异常，请稍后再试...');
+                    console.log(e);
+                }
+            });
         }
     }
 </script>

@@ -71,15 +71,18 @@
         </p>
     </div>
 </div>
-<div class="comment-container">
+<div class="comment-container" id="comment-container">
     <div class="container">
         <div class="row">
             <div class="clearfix">
                 <form id="comment_form" class="comment-form">
-                    <input type="text" name="name" id="name"
-                           class="form-control input-control clearfix"
-                           placeholder="姓名 (必填)"/>
-                    <textarea name="content" id="content" class="form-control" placeholder="字数不能超过800哦！"></textarea>
+                    <input type="hidden" name="aid" id="aid">
+                    <div class="form-group">
+                        <input type="text" name="name" id="name" class="form-control input-control" placeholder="姓名 (必填)"/>
+                    </div>
+                    <div class="form-group">
+                        <textarea name="content" id="content" class="form-control" placeholder="字数不能超过800哦！"></textarea>
+                    </div>
                     <p><span id="count">800</span>/800</p>
                     <button type="button" class="submit" id="submitComment">提交</button>
                 </form>
@@ -87,7 +90,6 @@
                     <span class="response">评论已关闭</span>
                 </div>
             </div>
-
             <div id="comment" class="comment-form">
                 <div id="comment_list" class="comment_list">
                     <div>
@@ -111,13 +113,35 @@
             </div>
         </div>
     </div>
-
 </div>
+<footer class="footer bg-white">
+    <div class="footer-meta">
+        <div class="footer-container">
+            <div class="meta-item meta-copyright">
+                <div class="meta-copyright-info">
+                    <div class="info-text">
+                        <p>
+                            &copy; 版权所有
+                            <a href="#" target="_blank" rel="nofollow">我的博客</a>
+                            保留一切权利
+                        </p>
+                        <br/>
+                        <p>备1111号</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</footer>
 <!--所有页面必须导入start-->
 <script src="./static/plugins/jquery/jquery-3.4.0.js"></script>
 <script src="./static/plugins/bootstrap/js/bootstrap.js"></script>
 <script src="./static/js/base.js"></script>
 <!--所有页面必须导入end-->
+<script src="./static/plugins/bootstrap-validator/js/bootstrapValidator.js"></script>
+<script src="./static/plugins/bootstrap-validator/js/language/zh_CN.js"></script>
+
 <script src="./static/plugins/editor/lib/marked.min.js"></script>
 <script src="./static/plugins/editor/lib/prettify.min.js"></script>
 <script src="./static/plugins/editor/lib/raphael.min.js"></script>
@@ -127,16 +151,17 @@
 <script src="./static/plugins/editor/lib/jquery.flowchart.min.js"></script>
 <script src="./static/plugins/editor/editormd.js"></script>
 
-<script src="./static/plugins/bootstrap-validator/js/bootstrapValidator.js"></script>
-<script src="./static/plugins/bootstrap-validator/js/language/zh_CN.js"></script>
+
 <script>
+    var aid;
     $(function () {
-        var aid=getUrlParam("aid");
+        aid=getUrlParam("aid");
         if(aid){
             getArticleInfo(aid);
         }
         /*字数限制*/
         $("#content").on("input propertychange", function() {
+            console.log(111);
             var val=$(this).val();
             if (val.length > 800) {
                 $(this).val(val.substring(0, 800));
@@ -147,18 +172,17 @@
 
         /*bootstrap验证插件*/
         $('#comment_form').bootstrapValidator({
-            /*验证状态图标设置*/
-            feedbackIcons:{
-                valid:'glyphicon glyphicon-ok',             //验证成功状态
-                invalid:'glyphicon glyphicon-remove',       //验证失败状态
-                validating:'glyphicon glyphicon-refresh'    //正在验证状态
-            },
             /*配置要验证的属性*/
             fields:{
                 name:{
                     validators:{
                         notEmpty:{
                             message:'名称不能为空'
+                        },
+                        stringLength:{
+                            min:1,
+                            max:8,
+                            message:'名称长度不得超过8个字符'
                         }
                     }
                 },
@@ -175,6 +199,7 @@
             var bootstrapValidator = $("#comment_form").data('bootstrapValidator');
             bootstrapValidator.validate();
             if(bootstrapValidator.isValid()){
+                $('#aid').val(aid);
                 $.ajax({
                     url:getRootPath()+'/post/addComment',
                     data:$('#comment_form').serialize(),
@@ -186,6 +211,7 @@
                         }else{
                             alert('评论失败！');
                         }
+                        $('#comment_form')[0].reset();
                         getCommentList(aid);
                     },
                     error:function (e) {
@@ -226,7 +252,11 @@
                     categoryHtml+='<span class="label label-success">'+caList[i].cname+'</span> ';
                 }
                 $('#categorie_list').empty().append(categoryHtml);
-                getCommentList(aid);
+                if(article.status==1){
+                    getCommentList(aid);
+                }else{
+                    $('#comment-container').remove();
+                }
             },
             error:function (e) {
                 alert('获取文章详情失败，请稍后再试...');
@@ -234,8 +264,54 @@
             }
         });
     }
-    function getCommentList(aid) {
-
+    function getCommentList(aid,page) {
+        if(!page){
+            page=1;
+        }
+        $.ajax({
+            url:getRootPath()+'/post/getCommentList',
+            data:{
+                aid:aid,
+                page:page
+            },
+            method:'post',
+            dataType:'json',
+            success:function (res) {
+                var commentList=res.rows;
+                var commentHtml='';
+                for(var i=0;i<commentList.length;i++){
+                    commentHtml+='<div>';
+                    commentHtml+='<h3>作者：'+commentList[i].name+'</h3>';
+                    commentHtml+='<p>'+commentList[i].content+'</p>';
+                    commentHtml+='留言时间：<span>'+commentList[i].created+'</span>';
+                    commentHtml+='</div>';
+                }
+                $('#comment_list').empty().append(commentHtml);
+                //分页
+                var pageInfo=res.pageInfo;
+                var pageBarHtml='';
+                if(pageInfo.pages>1){
+                    if(pageInfo.hasPreviousPage){//是否有上一页
+                        pageBarHtml+='<li><a href="javascript:;" onclick="getCommentList('+aid+','+(pageInfo.pageNum-1)+')" aria-label="Previous"><span aria-hidden="true">上一页</span></a></li>';
+                    }
+                    for(var i=0;i<pageInfo.pages;i++){
+                        var active='';
+                        if(pageInfo.pageNum==pageInfo.navigatepageNums[i]){
+                            active='active';
+                        }
+                        pageBarHtml+='<li class="'+active+'"><a href="javascript:;" onclick="getCommentList('+aid+','+pageInfo.navigatepageNums[i]+')">'+pageInfo.navigatepageNums[i]+'<span class="sr-only">(current)</span></a></li>';
+                    }
+                    if(pageInfo.hasNextPage){//是否有下一页
+                        pageBarHtml+='<li><a href="javascript:;" onclick="getCommentList('+aid+','+(pageInfo.pageNum+1)+')" aria-label="Previous"><span aria-hidden="true">下一页</span></a></li>';
+                    }
+                }
+                $('#paging_toolbar').empty().append(pageBarHtml);
+            },
+            error:function (e) {
+                alert('获取评论列表失败！');
+                console.log(e);
+            }
+        });
     }
 </script>
 </body>

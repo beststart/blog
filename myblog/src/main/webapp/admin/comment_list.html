@@ -8,12 +8,10 @@
     <meta content="Coderthemes" name="author"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <link rel="shortcut icon" href="../static/image/logo.png"/>
-    <link href="../vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
-    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
-    <link href="../vendor/css/style.css" rel="stylesheet" type="text/css"/>
-    <link href="../vendor/tagsinput/jquery.tagsinput.css" rel="stylesheet"/>
-    <link href="../vendor/select2.dist.css/select2-bootstrap.css" rel="stylesheet"/>
-    <link href="../vendor/toggles/toggles.css" rel="stylesheet"/>
+    <link href="../static/plugins/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+    <link href="../static/plugins/bootstrap-table/bootstrap-table.css" rel="stylesheet">
+    <link href="../static/plugins/font-awesome-4.7.0/css/font-awesome.css" rel="stylesheet">
+    <link href="../static/css/style.css" rel="stylesheet" type="text/css"/>
     <style>
         #tags_addTag input {
             width: 100%;
@@ -113,49 +111,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-12">
-                        <table class="table table-striped table-bordered">
-                            <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>评论人</th>
-                                <th>评论内容</th>
-                                <th>评论时间</th>
-                                <th>IP</th>
-                                <th>评论状态</th>
-                                <th>操作</th>
-                            </tr>
-                            </thead>
-                            <tbody id="tb_comment">
-                            <tr>
-                                <td>1</td>
-                                <td>weidong</td>
-                                <td>我是评论内容</td>
-                                <td>2019年4月23日14:00:30</td>
-                                <td>127.0.0.1</td>
-                                <td>
-                                    <span class="label label-success">审核通过</span>
-                                    <span class="label label-default">未审核</span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-success btn-sm waves-effect waves-light">通过</button>
-                                    <button class="btn btn-warning btn-sm waves-effect waves-light">拒绝</button>
-                                    <button class="btn btn-danger btn-sm waves-effect waves-light">删除</button>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                        <nav class="pull-right">
-                            <ul class="pagination" id="paging_toolbar">
-                                <li><a href="#" aria-label="Previous"><span aria-hidden="true">上一页</span></a></li>
-                                <li class="active"><a href="#">1<span class="sr-only">(current)</span></a></li>
-                                <li class=""><a href="#">2<span class="sr-only">(current)</span></a></li>
-                                <li class=""><a href="#">3<span class="sr-only">(current)</span></a></li>
-                                <li class=""><a href="#">4<span class="sr-only">(current)</span></a></li>
-                                <li class=""><a href="#">5<span class="sr-only">(current)</span></a></li>
-                                <li class="disabled"><a href="#" aria-label="Previous"><span
-                                        aria-hidden="true">下一页</span></a></li>
-                            </ul>
-                        </nav>
+                        <table id="infoTable"></table>
                     </div>
                 </div>
                 <!--页脚-->
@@ -169,10 +125,190 @@
         </div>
     </div>
 </div>
+
+
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">评论详情</h4>
+            </div>
+            <div class="modal-body">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Panel title</h3>
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-footer">Panel footer</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!--所有页面必须导入start-->
-<script src="../vendor/jquery/jquery.js"></script>
-<script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
-<script src="../vendor/jquery.app.js"></script>
-<script src="../vendor/base.js"></script>
+<script src="../static/plugins/jquery/jquery-3.4.0.js"></script>
+<script src="../static/plugins/bootstrap/js/bootstrap.js"></script>
+<script src="../static/plugins/jquery/jquery.app.js"></script>
+<script src="../static/js/base.js"></script>
+<!--所有页面必须导入end-->
+<script src="../static/plugins/bootstrap-table/bootstrap-table.js"></script>
+<script src="../static/plugins/bootstrap-table/bootstrap-table-zh-CN.js"></script>
+
+<script>
+    $(function () {
+        $('#infoTable').bootstrapTable({
+            url: getRootPath()+'/admin/comment/getPage',
+            method: 'get',
+            striped: true,                  //隔行换色
+            cache: false,                   //是否缓存，默认true
+            sidePagination: 'server',       //服务端分页
+            pageNumber: 1,                  //默认加载第一页
+            pagination: true,               //是否显示分页
+            pageSize: 5,                    //每页显示条数
+            pageList:[5,10,20,30,50],       //可供选择的每页行数
+            showRefresh: true,              //是否显示刷新按钮
+            clickToSelect: true,            //是否启用点击选中行
+            // height: 500,                 //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+            uniqueId: "id",                 //每一行的唯一标识，一般为主键列
+            showToggle: true,               //是否显示详细视图和列表视图的切换按钮
+            cardView: false,                //是否显示详细视图
+            toolbar: '#toolbar',            //工具按钮用哪个容器
+            columns: [{
+                field: 'id',
+                title: '编号'
+            }, {
+                field: 'name',
+                title: '评论人'
+            }, {
+                field: 'content',
+                title: '评论内容',
+                formatter: contentFun
+            },{
+                field:'created',
+                title:'发表时间'
+            },{
+                field:'status',
+                title:'评论状态',
+                formatter: statusFun
+            },{
+                field: 'opt',
+                title: '操作',
+                formatter: optFun
+            }]
+        });
+        /*监听模态窗打开事件*/
+        $('#detailModal').on('show.bs.modal',function (event) {
+            var id = $(event.relatedTarget).data('id');
+            if(id){
+                $.ajax({
+                    url:getRootPath()+'/admin/comment/getById',
+                    data:{id:id},
+                    method:'get',
+                    dataType:'json',
+                    success:function (res) {
+                        if(res.code==403){
+                            show403();
+                        }else{
+                            $('.panel-title').text('评论人：'+res.name);
+                            $('.panel-body').text(res.content);
+                            $('.panel-footer').text('评论时间：'+res.created);
+                        }
+                    },
+                    error:function (e) {
+                        alert('获取评论详情异常，请稍后再试...');
+                        console.log(e);
+                    }
+                });
+            }
+        });
+    });
+    function contentFun(value) {
+        var content=value;
+        if(content.length>15){
+            content=content.substr(0,15)+'...';
+        }
+        return '<span title="'+value+'">'+content+'</span>';
+    }
+    function statusFun(value) {
+        if(value==1){
+            return '<span class="label label-default">未审核</span>';
+        }else if(value==2){
+            return '<span class="label label-success">审核通过</span>';
+        }else{
+            return '<span class="label label-warning">拒绝</span>';
+        }
+    }
+    function optFun(value,row) {
+        var yes,no;
+        if(row.status==2){
+            yes='disabled';
+        }
+        if(row.status==3){
+            no='disabled';
+        }
+        return '<button class="btn btn-success btn-sm waves-effect waves-light" onclick="changeStatus('+row.id+',2)" '+yes+'>通过</button> <button class="btn btn-warning btn-sm waves-effect waves-light" '+no+' onclick="changeStatus('+row.id+',3)">拒绝</button> <button class="btn btn-danger btn-sm waves-effect waves-light" onclick="deleteInfo('+row.id+')">删除</button> <button class="btn btn-primary btn-sm waves-effect waves-light" data-toggle="modal" data-target="#detailModal" data-id="'+row.id+'">详情</button>';
+    }
+    function changeStatus(id,status) {
+        var msg=status==2?'通过':'拒绝';
+        if(confirm('确定'+msg+'这条评论吗？')){
+            $.ajax({
+                url:getRootPath()+'/admin/comment/update',
+                data:{id:id,status:status},
+                method:'post',
+                dataType:'json',
+                success:function (res) {
+                    if(res.code==403){
+                        show403();
+                    }else{
+                        if(res.code==1){
+                            alert('审核成功！');
+                        }else{
+                            alert('审核失败！');
+                        }
+                        $('#infoTable').bootstrapTable('refresh');
+                    }
+                },
+                error:function (e) {
+                    alert('审核状态出现异常，请稍后再试...');
+                    console.log(e);
+                }
+            });
+        }
+    }
+    function deleteInfo(id) {
+        if(confirm('确定删除本数据吗？')){
+            $.ajax({
+                url:getRootPath()+'/admin/comment/delete',
+                data:{id:id},
+                method:'post',
+                dataType:'json',
+                success:function (res) {
+                    if(res.code==403){
+                        show403();
+                    }else {
+                        if(res.code==1){
+                            alert('删除成功！');
+                        }else{
+                            alert('删除失败！');
+                        }
+                        $('#infoTable').bootstrapTable('refresh');
+                    }
+                },
+                error:function (e) {
+                    alert('删除留言出现异常，请稍后再试...');
+                    console.log(e);
+                }
+            });
+        }
+    }
+</script>
+
 </body>
+
 </html>

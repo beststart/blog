@@ -4,9 +4,11 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.xd.pjj.myblog.bean.Article;
 import com.xd.pjj.myblog.bean.CategoryArticle;
+import com.xd.pjj.myblog.bean.Comment;
 import com.xd.pjj.myblog.mapper.ArticleMapper;
 import com.xd.pjj.myblog.mapper.CategoryArticleMapper;
 import com.xd.pjj.myblog.mapper.CategoryMapper;
+import com.xd.pjj.myblog.mapper.CommentMapper;
 import com.xd.pjj.myblog.service.ArticleService;
 import com.xd.pjj.myblog.util.MyUtil;
 import com.xd.pjj.myblog.util.Result;
@@ -26,6 +28,8 @@ public class ArticleServiceImpl implements ArticleService {
     private ArticleMapper articleMapper;
     @Autowired
     private CategoryArticleMapper categoryArticleMapper;
+    @Autowired
+    private CommentMapper commentMapper;
 
     @Override
     public Result update(Article article, Integer[] sel_category) {
@@ -89,6 +93,17 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public Article getById(Integer id) {
         return articleMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public Result delete(Integer id) {
+        int result=articleMapper.deleteByPrimaryKey(id);
+        if(result>0){
+            result=commentMapper.deleteByAid(id);
+        }else{
+            throw new Error("删除数据失败！");
+        }
+        return new Result(result);
     }
 
     private List<CategoryArticle> formateList(Integer aid,Integer[] sel_category){

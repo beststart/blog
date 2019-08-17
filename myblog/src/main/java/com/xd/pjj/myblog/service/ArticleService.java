@@ -12,5 +12,6 @@ public interface ArticleService {
     Result getPage(int page,int limit,Article article);
     List<CategoryArticle> getCategoryByAid(Integer aid);
     Article getById(Integer id);
+    Result delete(Integer id);
 
 }

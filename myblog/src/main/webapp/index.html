@@ -126,9 +126,10 @@
                             articleHtml+='</div></div>';
                         }
                         $('#article').empty().append(articleHtml);
+                        //分页
                         var pageInfo=res.pageInfo;
+                        var pageBarHtml='';
                         if(pageInfo.pages>1){
-                            var pageBarHtml='';
                             if(pageInfo.hasPreviousPage){//是否有上一页
                                 pageBarHtml+='<li><a href="javascript:;" onclick="loadPageInfo('+(pageInfo.pageNum-1)+')" aria-label="Previous"><span aria-hidden="true">上一页</span></a></li>';
                             }
@@ -137,14 +138,14 @@
                                 if(pageInfo.pageNum==pageInfo.navigatepageNums[i]){
                                     active='active';
                                 }
-                                pageBarHtml+='<li class="'+active+'"><a href="javascript:;" onclick="loadPageInfo('+(pageInfo.pageNum+1)+')">'+pageInfo.navigatepageNums[i]+'<span class="sr-only">(current)</span></a></li>';
+                                pageBarHtml+='<li class="'+active+'"><a href="javascript:;" onclick="loadPageInfo('+pageInfo.navigatepageNums[i]+')">'+pageInfo.navigatepageNums[i]+'<span class="sr-only">(current)</span></a></li>';
                             }
                             if(pageInfo.hasNextPage){//是否有下一页
                                 pageBarHtml+='<li><a href="javascript:;" onclick="loadPageInfo('+(pageInfo.pageNum+1)+')" aria-label="Previous"><span aria-hidden="true">下一页</span></a></li>';
                             }
-
-                            $('#paging_toolbar').empty().append(pageBarHtml);
                         }
+                        $('#paging_toolbar').empty().append(pageBarHtml);
+
                     }
             },
             error:function (e) {

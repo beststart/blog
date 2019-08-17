@@ -114,4 +114,8 @@
         </if>
         order by c.created desc
     </select>
+
+    <delete id="deleteByAid" parameterType="int">
+        delete from comment where aid=#{aid}
+    </delete>
 </mapper>

@@ -7,4 +7,5 @@ public interface CommentService {
     Result update(Comment comment);
     Result getPage(Integer page,Integer limit,Comment comment);
     Result delete(Integer id);
+    Comment getById(Integer id);
 }

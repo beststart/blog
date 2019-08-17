@@ -32,7 +32,7 @@ public class PostController {
     public Result getCommentList(@RequestParam(defaultValue = "1") Integer page,@RequestParam(defaultValue = "10") Integer limit,@RequestParam(defaultValue = "0") Integer aid){
         Comment comment=new Comment();
         comment.setAid(aid);
-        comment.setStatus(1);
+        comment.setStatus(2);//1未审核，2通过
         return commentService.getPage(page,limit,comment);
     }
 
