@@ -48,30 +48,18 @@
     <div class="index-page clearfix">
         <div class="row">
             <div id="article">
-                <div id="post_item" class="text-left post_item">
+                <div class="text-left post_item">
                     <a href="post.html">
                         <h1>Bootstrap使用指南</h1>
                     </a>
                     <div class="post_content">
-                        <p>
-                            Bootstrap是美国Twitter公司的设计师Mark Otto和Jacob Thornton合
-                        </p>
-                        <p>
-                            更新时间：2019年4月26日19:42:33
-                        </p>
+                        <p>Bootstrap是美国Twitter公司的设计师Mark Otto和Jacob Thornton合</p>
+                        <p>更新时间：2019年4月26日19:42:33</p>
                     </div>
                 </div>
             </div>
             <nav class="text-center">
                 <ul class="pagination" id="paging_toolbar">
-                    <li><a href="#" aria-label="Previous"><span aria-hidden="true">上一页</span></a></li>
-                    <li class="active"><a href="#">1<span class="sr-only">(current)</span></a></li>
-                    <li class=""><a href="#">2<span class="sr-only">(current)</span></a></li>
-                    <li class=""><a href="#">3<span class="sr-only">(current)</span></a></li>
-                    <li class=""><a href="#">4<span class="sr-only">(current)</span></a></li>
-                    <li class=""><a href="#">5<span class="sr-only">(current)</span></a></li>
-                    <li class="disabled"><a href="#" aria-label="Previous"><span
-                            aria-hidden="true">下一页</span></a></li>
                 </ul>
             </nav>
         </div>
@@ -103,5 +91,68 @@
 <script src="./static/plugins/bootstrap/js/bootstrap.js"></script>
 <script src="./static/js/base.js"></script>
 <!--所有页面必须导入end-->
+<script>
+    $(function () {
+        loadPageInfo(1);
+    });
+    function loadPageInfo(page) {
+        $.ajax({
+            url:getRootPath()+'/frontIndex/getArticleList',
+            data:{page:page},
+            method:'get',
+            dataType:'json',
+            success:function (res) {
+                    var articleList=res.rows;
+                    if(articleList.length==0){
+                        $('#article').empty().append('<h1>暂无文章!</h1>');
+                    }else{
+                        var articleHtml='';
+                        for(var i=0;i<articleList.length;i++){
+                            articleHtml+='<div class="text-left post_item">';
+                            articleHtml+='<a onclick="addHits('+articleList[i].id+')" href="post.html?aid='+articleList[i].id+'">';
+                            var title=articleList[i].title;
+                            if(title.length>30){
+                                title=title.substr(0,30)+'...';
+                            }
+                            articleHtml+='<h1 title="'+articleList[i].title+'">'+title+'</h1>';
+                            articleHtml+='</a>';
+                            articleHtml+='<div class="post_content">';
+                            var intro=articleList[i].intro;
+                            if(intro.length>180){
+                                intro=intro.substr(0,180)+'...';
+                            }
+                            articleHtml+='<p title="'+articleList[i].intro+'">'+intro+'</p>';
+                            articleHtml+='<p>更新时间：'+articleList[i].created+'</p>';
+                            articleHtml+='</div></div>';
+                        }
+                        $('#article').empty().append(articleHtml);
+                        var pageInfo=res.pageInfo;
+                        if(pageInfo.pages>1){
+                            var pageBarHtml='';
+                            if(pageInfo.hasPreviousPage){//是否有上一页
+                                pageBarHtml+='<li><a href="javascript:;" onclick="loadPageInfo('+(pageInfo.pageNum-1)+')" aria-label="Previous"><span aria-hidden="true">上一页</span></a></li>';
+                            }
+                            for(var i=0;i<pageInfo.pages;i++){
+                                var active='';
+                                if(pageInfo.pageNum==pageInfo.navigatepageNums[i]){
+                                    active='active';
+                                }
+                                pageBarHtml+='<li class="'+active+'"><a href="javascript:;" onclick="loadPageInfo('+(pageInfo.pageNum+1)+')">'+pageInfo.navigatepageNums[i]+'<span class="sr-only">(current)</span></a></li>';
+                            }
+                            if(pageInfo.hasNextPage){//是否有下一页
+                                pageBarHtml+='<li><a href="javascript:;" onclick="loadPageInfo('+(pageInfo.pageNum+1)+')" aria-label="Previous"><span aria-hidden="true">下一页</span></a></li>';
+                            }
+
+                            $('#paging_toolbar').empty().append(pageBarHtml);
+                        }
+                    }
+            },
+            error:function (e) {
+                alert('加载首页文章信息失败，请稍后再试...');
+                console.log(e);
+            }
+        });
+    }
+</script>
 </body>
 </html>

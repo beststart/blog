@@ -20,4 +20,8 @@ public interface ArticleMapper {
     int updateByPrimaryKey(Article record);
 
     List<Article> getAll(Article article);
+
+    List<Article> getByCid(Integer cid);
+
+    int addHits(Integer id);
 }

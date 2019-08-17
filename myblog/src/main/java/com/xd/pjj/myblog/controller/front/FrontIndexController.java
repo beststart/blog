@@ -18,7 +18,9 @@ public class FrontIndexController {
     private ArticleService articleService;
 
     @RequestMapping("/getArticleList")
-    public Result getPage(@RequestParam(defaultValue = "1",required = false) Integer page,@RequestParam(defaultValue = "10",required = false) Integer limit){
-        return articleService.getPage(page,limit,new Article());
+    public Result getPage(@RequestParam(defaultValue = "1",required = false) Integer page,@RequestParam(defaultValue = "5",required = false) Integer limit){
+        Article article=new Article();
+        article.setStatus(1);
+        return articleService.getPage(page,limit,article);
     }
 }

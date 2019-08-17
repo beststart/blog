@@ -11,4 +11,5 @@ public interface CategoryService {
     Category getById(Integer id);
     Result delete(Integer id);
     List<Category> getAll();
+    List<Category> getAllForFront();
 }

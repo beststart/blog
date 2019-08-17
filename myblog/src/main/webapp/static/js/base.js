@@ -41,3 +41,11 @@ function getUrlParam(name) {
     if (r != null) return unescape(r[2]);
     return null; //返回参数值
 }
+
+/**
+ * 点击数
+ * @param aid
+ */
+function addHits(aid) {
+    $.post(getRootPath()+'/post/addHits',{aid:aid});
+}

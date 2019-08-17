@@ -13,6 +13,16 @@ public class Comment {
 
     private String created;
 
+    private String aname;
+
+    public String getAname() {
+        return aname;
+    }
+
+    public void setAname(String aname) {
+        this.aname = aname;
+    }
+
     public Integer getId() {
         return id;
     }

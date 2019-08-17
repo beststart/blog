@@ -33,6 +33,7 @@ public class ArticleServiceImpl implements ArticleService {
         List<CategoryArticle> caList;
         if(article.getId()==null){
             article.setCreated(MyUtil.nowDate());
+            article.setUpdated(MyUtil.nowDate());
             result=articleMapper.insertSelective(article);
             if(result>0){
                 caList=formateList(article.getId(),sel_category);
@@ -44,6 +45,9 @@ public class ArticleServiceImpl implements ArticleService {
                 throw new Error("添加文章内容失败！");
             }
         }else{
+            if(article.getStatus()==1){//草稿修改为发布时，更新发表时间
+                article.setCreated(MyUtil.nowDate());
+            }
             article.setUpdated(MyUtil.nowDate());
             result=articleMapper.updateByPrimaryKeySelective(article);
             if(result>0){

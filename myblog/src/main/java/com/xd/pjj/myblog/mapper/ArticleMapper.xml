@@ -170,5 +170,14 @@
                 and created between #{created} and #{updated}
             </if>
         </where>
+        order by created desc
     </select>
+
+    <select id="getByCid" parameterType="int" resultType="Article">
+        select a.* from category_article ca,article a where ca.aid=a.id and ca.cid=#{cid} and a.status=1
+    </select>
+
+    <update id="addHits" parameterType="int">
+        update article set hits=hits+1 where id=#{id}
+    </update>
 </mapper>

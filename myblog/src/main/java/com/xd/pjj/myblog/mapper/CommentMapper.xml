@@ -103,4 +103,15 @@
       created = #{created,jdbcType=VARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+    <select id="getAll" parameterType="Comment" resultType="Comment">
+        select c.*,a.title aname from comment c,article a where c.aid=a.id
+        <if test="aid!=null">
+            and c.aid=#{aid}
+        </if>
+        <if test="status!=null">
+            and c.status=#{status}
+        </if>
+        order by c.created desc
+    </select>
 </mapper>

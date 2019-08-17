@@ -2,7 +2,9 @@ package com.xd.pjj.myblog.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.xd.pjj.myblog.bean.Article;
 import com.xd.pjj.myblog.bean.Category;
+import com.xd.pjj.myblog.mapper.ArticleMapper;
 import com.xd.pjj.myblog.mapper.CategoryMapper;
 import com.xd.pjj.myblog.service.CategoryService;
 import com.xd.pjj.myblog.util.Result;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -18,6 +21,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Autowired
     private CategoryMapper categoryMapper;
+
+    @Autowired
+    private ArticleMapper articleMapper;
 
 
     @Override
@@ -53,5 +59,15 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Category> getAll() {
         return categoryMapper.getAll();
+    }
+
+    @Override
+    public List<Category> getAllForFront() {
+        List<Category> categoryList=getAll();
+        for(Category c:categoryList){
+            List<Article> articleList=articleMapper.getByCid(c.getId());
+            c.setArticleList(articleList);
+        }
+        return categoryList;
     }
 }

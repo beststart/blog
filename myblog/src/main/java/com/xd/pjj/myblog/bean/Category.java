@@ -1,11 +1,23 @@
 package com.xd.pjj.myblog.bean;
 
+import java.util.List;
+
 public class Category {
     private Integer id;
 
     private String name;
 
     private String description;
+
+    private List<Article> articleList;
+
+    public List<Article> getArticleList() {
+        return articleList;
+    }
+
+    public void setArticleList(List<Article> articleList) {
+        this.articleList = articleList;
+    }
 
     public Integer getId() {
         return id;

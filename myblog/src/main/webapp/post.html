@@ -17,9 +17,12 @@
 
     <title>主页</title>
     <!-- Bootstrap -->
-    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="./static/user/css/style.css" rel="stylesheet"/>
-    <link rel="stylesheet" href="./vendor/editor/css/editormd.css"/>
+    <link href="static/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/user/css/style.css" rel="stylesheet"/>
+
+    <link href="static/plugins/editor/css/editormd.css" rel="stylesheet"/>
+    <link href="static/plugins/bootstrap-validator/css/bootstrapValidator.css" rel="stylesheet"/>
+
 
     <style>
         .label {
@@ -54,7 +57,7 @@
     <div class="row">
         <div class="text-center col-md-12">
             <h1 id="title">Markdown转HTML的显示处理之自定义 ToC 容器</h1>
-            <p id="other"></p>
+            <p id="other">发布于：2018-05-05 18:22:22</p>
             <div id="categorie_list">
                 <span class="label label-success">HTML</span>
                 <span class="label label-success">Java</span>
@@ -72,15 +75,13 @@
     <div class="container">
         <div class="row">
             <div class="clearfix">
-                <form method="post" id="comment_form" class="comment-form" role="form"
-                      onsubmit="return subComment();">
-                    <input type="text" name="author" maxlength="12" id="comment_author"
+                <form id="comment_form" class="comment-form">
+                    <input type="text" name="name" id="name"
                            class="form-control input-control clearfix"
-                           placeholder="姓名 (*)"/>
-                    <textarea name="text" id="comment_content" class="form-control" placeholder="以上信息可以为空,评论不能为空哦!"
-                              required="required" minlength="5"
-                              maxlength="2000"></textarea>
-                    <button type="submit" class="submit" id="misubmit">提交</button>
+                           placeholder="姓名 (必填)"/>
+                    <textarea name="content" id="content" class="form-control" placeholder="字数不能超过800哦！"></textarea>
+                    <p><span id="count">800</span>/800</p>
+                    <button type="button" class="submit" id="submitComment">提交</button>
                 </form>
                 <div class="text-center" id="comment_forbid">
                     <span class="response">评论已关闭</span>
@@ -113,22 +114,130 @@
 
 </div>
 <!--所有页面必须导入start-->
-<script src="./vendor/jquery/jquery.min.js"></script>
-<script src="./vendor/bootstrap/js/bootstrap.min.js"></script>
-<script src="./vendor/base.js"></script>
+<script src="./static/plugins/jquery/jquery-3.4.0.js"></script>
+<script src="./static/plugins/bootstrap/js/bootstrap.js"></script>
+<script src="./static/js/base.js"></script>
 <!--所有页面必须导入end-->
+<script src="./static/plugins/editor/lib/marked.min.js"></script>
+<script src="./static/plugins/editor/lib/prettify.min.js"></script>
+<script src="./static/plugins/editor/lib/raphael.min.js"></script>
+<script src="./static/plugins/editor/lib/underscore.min.js"></script>
+<script src="./static/plugins/editor/lib/sequence-diagram.min.js"></script>
+<script src="./static/plugins/editor/lib/flowchart.min.js"></script>
+<script src="./static/plugins/editor/lib/jquery.flowchart.min.js"></script>
+<script src="./static/plugins/editor/editormd.js"></script>
 
-<script src="./vendor/url.param.js"></script>
+<script src="./static/plugins/bootstrap-validator/js/bootstrapValidator.js"></script>
+<script src="./static/plugins/bootstrap-validator/js/language/zh_CN.js"></script>
+<script>
+    $(function () {
+        var aid=getUrlParam("aid");
+        if(aid){
+            getArticleInfo(aid);
+        }
+        /*字数限制*/
+        $("#content").on("input propertychange", function() {
+            var val=$(this).val();
+            if (val.length > 800) {
+                $(this).val(val.substring(0, 800));
+            }
+            var count = 800 - $(this).val().length;
+            $("#count").text(count);
+        });
 
-<script src="./vendor/editor/lib/marked.min.js"></script>
-<script src="./vendor/editor/lib/prettify.min.js"></script>
+        /*bootstrap验证插件*/
+        $('#comment_form').bootstrapValidator({
+            /*验证状态图标设置*/
+            feedbackIcons:{
+                valid:'glyphicon glyphicon-ok',             //验证成功状态
+                invalid:'glyphicon glyphicon-remove',       //验证失败状态
+                validating:'glyphicon glyphicon-refresh'    //正在验证状态
+            },
+            /*配置要验证的属性*/
+            fields:{
+                name:{
+                    validators:{
+                        notEmpty:{
+                            message:'名称不能为空'
+                        }
+                    }
+                },
+                content:{
+                    validators:{
+                        notEmpty:{
+                            message:'评论内容不能为空'
+                        }
+                    }
+                }
+            }
+        });
+        $('#submitComment').click(function () {
+            var bootstrapValidator = $("#comment_form").data('bootstrapValidator');
+            bootstrapValidator.validate();
+            if(bootstrapValidator.isValid()){
+                $.ajax({
+                    url:getRootPath()+'/post/addComment',
+                    data:$('#comment_form').serialize(),
+                    method:'post',
+                    dataType:'json',
+                    success:function (res) {
+                        if(res.code==1){
+                            alert('评论成功！');
+                        }else{
+                            alert('评论失败！');
+                        }
+                        getCommentList(aid);
+                    },
+                    error:function (e) {
+                        console.log(e);
+                        alert('评论失败，请稍后再试...');
+                    }
+                });
+            }
+        });
+    });
+    function getArticleInfo(aid) {
+        $.ajax({
+            url:getRootPath()+'/post/getPost',
+            data:{aid:aid},
+            method:'get',
+            dataType:'json',
+            success:function (res) {
+                var article=res.article;
+                var caList=res.caList;
+                $('#title').text(article.title);
+                $('#other').text('发布于'+article.created);
+                editormd.markdownToHTML("post_content", {
+                    markdown:article.content,
+                    htmlDecode: "style,script,iframe",
+                    emoji: true,
+                    taskList: true,
+                    tex: true,  // 默认不解析
+                    flowChart: true,  // 默认不解析
+                    sequenceDiagram: true  // 默认不解析
+                });
+                if(article.comment==1){
+                    $('#comment_forbid').remove();
+                }else{
+                    $('#comment_form').remove();
+                }
+                var categoryHtml='';
+                for(var i=0;i<caList.length;i++){
+                    categoryHtml+='<span class="label label-success">'+caList[i].cname+'</span> ';
+                }
+                $('#categorie_list').empty().append(categoryHtml);
+                getCommentList(aid);
+            },
+            error:function (e) {
+                alert('获取文章详情失败，请稍后再试...');
+                console.log(e);
+            }
+        });
+    }
+    function getCommentList(aid) {
 
-<script src="./vendor/editor/lib/raphael.min.js"></script>
-<script src="./vendor/editor/lib/underscore.min.js"></script>
-<script src="./vendor/editor/lib/sequence-diagram.min.js"></script>
-<script src="./vendor/editor/lib/flowchart.min.js"></script>
-<script src="./vendor/editor/lib/jquery.flowchart.min.js"></script>
-<script src="./vendor/editor/editormd.js"></script>
+    }
+</script>
 </body>
 
 </html>
