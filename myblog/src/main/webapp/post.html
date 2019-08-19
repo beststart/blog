@@ -280,13 +280,16 @@
                 var commentList=res.rows;
                 var commentHtml='';
                 for(var i=0;i<commentList.length;i++){
-                    commentHtml+='<div>';
+                    commentHtml+='<div id="comment_list_'+commentList[i].id+'" name="comment_list_'+commentList[i].id+'">';
                     commentHtml+='<h3>作者：'+commentList[i].name+'</h3>';
                     commentHtml+='<p>'+commentList[i].content+'</p>';
                     commentHtml+='留言时间：<span>'+commentList[i].created+'</span>';
                     commentHtml+='</div>';
                 }
                 $('#comment_list').empty().append(commentHtml);
+                $('body,html').animate({
+                    scrollTop:$('#'+getUrlAnchor()).offset().top-85
+                },1000);
                 //分页
                 var pageInfo=res.pageInfo;
                 var pageBarHtml='';

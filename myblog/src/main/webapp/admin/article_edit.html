@@ -179,7 +179,7 @@
         width: "100%",
         height: 640,
         syncScrolling: "single",
-        path: "../vendor/editor/lib/"
+        path: "../static/plugins/editor/lib/"
     });
     $(function () {
         var selectData;
@@ -260,7 +260,7 @@
                         width: "100%",
                         height: 640,
                         syncScrolling: "single",
-                        path: "../vendor/editor/lib/"
+                        path: "../static/plugins/editor/lib/"
                     });
 
                     if(res.status==1){
@@ -325,7 +325,7 @@
                 method:'post',
                 dataType:'json',
                 success:function (res) {
-                    if(res.code>1){
+                    if(res.code>0){
                         alert('操作成功！');
                         location.replace(getRootPath()+'/admin/article_list.html');
                     }else{

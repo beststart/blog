@@ -42,6 +42,11 @@ function getUrlParam(name) {
     return null; //返回参数值
 }
 
+function getUrlAnchor() {
+    var url=window.location.href;
+    return url.split('#')[1];
+}
+
 /**
  * 点击数
  * @param aid

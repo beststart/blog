@@ -1,6 +1,7 @@
 package com.xd.pjj.myblog.controller.admin;
 
 import com.xd.pjj.myblog.bean.Category;
+import com.xd.pjj.myblog.bean.CategoryArticle;
 import com.xd.pjj.myblog.service.CategoryService;
 import com.xd.pjj.myblog.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,11 @@ public class CategoryController {
     @RequestMapping("/getAll")
     public List<Category> getAll(){
         return categoryService.getAll();
+    }
+
+    @RequestMapping("/getCategoryByCid")
+    public List<CategoryArticle> getCategoryByCid(Integer cid){
+        return categoryService.getCategoryByCid(cid);
     }
 
 }

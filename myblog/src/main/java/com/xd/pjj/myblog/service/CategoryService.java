@@ -1,6 +1,7 @@
 package com.xd.pjj.myblog.service;
 
 import com.xd.pjj.myblog.bean.Category;
+import com.xd.pjj.myblog.bean.CategoryArticle;
 import com.xd.pjj.myblog.util.Result;
 
 import java.util.List;
@@ -12,4 +13,5 @@ public interface CategoryService {
     Result delete(Integer id);
     List<Category> getAll();
     List<Category> getAllForFront();
+    List<CategoryArticle> getCategoryByCid(Integer cid);
 }

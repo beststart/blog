@@ -10,6 +10,13 @@
     <link href="../static/plugins/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
     <link href="../static/plugins/font-awesome-4.7.0/css/font-awesome.css" rel="stylesheet"/>
     <link href="../static/css/style.css" rel="stylesheet" type="text/css"/>
+    <style>
+        .overflow{
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+    </style>
 </head>
 <body>
 <div id="wrapper">
@@ -151,15 +158,12 @@
                                     <h4 class="panel-title">最新评论</h4>
                                 </div>
                                 <div class="panel-body">
-                                    <div>
-                                        <div id="not_comment" class="alert alert-warning">
+                                    <div id="not_comment" class="alert alert-warning">
                                             还没有收到评论.
-                                        </div>
                                     </div>
                                     <ul id="comment_ul" class="list-group">
                                         <li class="list-group-item">
-                                            <div><a href="#" target="_blank">我是程序员</a>
-                                            </div>
+                                            <div><a href="#" target="_blank">我是程序员</a></div>
                                             评论于：<span>2019年4月20日14:04:53</span><br/>
                                             <a href="#" target="_blank">好文章，支持！！！</a>
                                         </li>
@@ -184,5 +188,87 @@
 <script src="../static/plugins/bootstrap/js/bootstrap.min.js"></script>
 <script src="../static/plugins/jquery/jquery.app.js"></script>
 <script src="../static/js/base.js"></script>
+<script>
+    $(function () {
+        $.ajax({
+            url:getRootPath()+'/admin/getIndexCount',
+            method:'get',
+            dataType:'json',
+            success:function (res) {
+                if(res.code==403){
+                    show403();
+                }else{
+                    $('#articleCount').text(res.articleCount);
+                    $('#commentCount').text(res.commentCount);
+                    $('#attachesCount').text(res.imgCount);
+                }
+            },
+            error:function (e) {
+                alert('获取首页统计数量异常，请稍后再试...');
+                console.log(e);
+            }
+        });
+
+        $.ajax({
+            url:getRootPath()+'/admin/getInfoList',
+            method:'get',
+            dataType:'json',
+            success:function (res) {
+                if(res.code==403){
+                    show403();
+                }else{
+                    var articleList=res.articleList;
+                    var commentList=res.commentList;
+                    var articleHtml='';
+                    if(articleList.length>0){
+                        for(var i=0;i<articleList.length;i++){
+                            articleHtml+='<li class="list-group-item" style="clear: left;height: 40px;">';
+                            articleHtml+='<div class="overflow" style="width: 350px;float: left;"><a title="'+articleList[i].title+'" target="_blank" href="../post.html?aid='+articleList[i].id+'">'+articleList[i].title+'</a></div>';
+                            articleHtml+='<div style="width:200px;float: right;">发表时间:'+articleList[i].created+'</div>';
+                            articleHtml+='</li>';
+                        }
+                    }else{
+                        articleHtml+='<li class="list-group-item"><a href="javascript:;">暂无文章</a></li>';
+                    }
+                    $('#new_article').empty().append(articleHtml);
+                    var commentHtml='';
+                    if(commentList.length>0){
+                        $('#not_comment').remove();
+                        for(var i=0;i<commentList.length;i++){
+                            commentHtml+='<li class="list-group-item">';
+                            commentHtml+='<div>评论人：'+commentList[i].name+'</div>';
+                            var aname=commentList[i].aname;
+                            if(aname.length>30){
+                                aname=aname.substr(0,30)+'...';
+                            }
+                            commentHtml+='<div>评论文章：<a target="_blank" href="../post.html?aid='+commentList[i].aid+'" title="'+commentList[i].aname+'">'+aname+'</a></div>';
+                            commentHtml+='<div>评论时间：<span>'+commentList[i].created+'</span></div>';
+                            if(commentList[i].status==1){
+                                commentHtml+='<div>状态：<span class="label label-default">未审核</span>👉<a href="comment_list.html"><span class="label label-default">审批</span></a></div>';
+                            }else if(commentList[i].status==2){
+                                commentHtml+='<div>状态：<span class="label label-success">通过</span>👉<a target="_blank" href="../post.html?aid='+commentList[i].aid+'#comment_list_'+commentList[i].id+'"><span class="label label-success">查看</span></a></div>';
+                            }else{
+                                commentHtml+='<div>状态：<span class="label label-warning">拒绝</span></div>';
+                            }
+                            var comment=commentList[i].content;
+                            if(comment.length>50){
+                                comment=comment.substr(0,50)+'...';
+                            }
+                            commentHtml+='<div title="'+commentList[i].content+'">内容：<br>'+comment+'</div>';
+                            commentHtml+='</li>';
+                        }
+                    }else{
+                        $('#comment_ul').remove();
+                    }
+                    $('#comment_ul').empty().append(commentHtml);
+                }
+            },
+            error:function (e) {
+                alert('获取首页最新文章和留言异常，请稍后再试...');
+                console.log(e);
+            }
+        });
+    });
+</script>
 </body>
 </html>

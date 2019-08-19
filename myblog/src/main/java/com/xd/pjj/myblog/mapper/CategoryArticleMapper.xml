@@ -88,4 +88,8 @@
     <select id="getByAid" parameterType="int" resultType="CategoryArticle">
         select ca.*,c.name cname from category_article ca,category c where ca.cid=c.id and ca.aid=#{aid}
     </select>
+
+    <select id="getByCid" parameterType="int" resultType="CategoryArticle">
+        select ca.*,c.name cname from category_article ca,category c where ca.cid=c.id and ca.cid=#{cid}
+    </select>
 </mapper>

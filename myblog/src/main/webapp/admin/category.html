@@ -198,8 +198,6 @@
             cardView: false,                //是否显示详细视图
             toolbar: '#toolbar',                  //工具按钮用哪个容器
             columns: [{
-                checkbox: true
-            }, {
                 field: 'id',
                 title: '编号'
             }, {
@@ -257,26 +255,43 @@
     function delInfo(id) {
         if(confirm('确定删除本数据吗？')){
             $.ajax({
-                url:getRootPath()+'/admin/category/delete',
-                data:{
-                    id:id
-                },
+                url:getRootPath()+'/admin/category/getCategoryByCid',
+                data:{cid:id},
                 method:'post',
                 dataType:'json',
                 success:function (res) {
-                    if(res.code==1){
-                        alert('删除成功！');
+                    if(res.length>0){
+                        alert('该分类已被使用，请先删除相关文章！');
                     }else{
-                        alert('删除失败！');
+                        $.ajax({
+                            url:getRootPath()+'/admin/category/delete',
+                            data:{
+                                id:id
+                            },
+                            method:'post',
+                            dataType:'json',
+                            success:function (res) {
+                                if(res.code==1){
+                                    alert('删除成功！');
+                                }else{
+                                    alert('删除失败！');
+                                }
+                                //刷新table
+                                $('#infoTable').bootstrapTable('refresh');
+                            },
+                            error:function (e) {
+                                alert('与服务器连接失败，请稍后再试...');
+                                console.log(e);
+                            }
+                        });
                     }
-                    //刷新table
-                    $('#infoTable').bootstrapTable('refresh');
                 },
                 error:function (e) {
-                    alert('与服务器连接失败，请稍后再试...');
+                    alert('获取该分类内文章个数失败，请稍后再试...');
                     console.log(e);
                 }
             });
+
         }
     }
     /*更新分类*/

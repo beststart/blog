@@ -4,7 +4,9 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.xd.pjj.myblog.bean.Article;
 import com.xd.pjj.myblog.bean.Category;
+import com.xd.pjj.myblog.bean.CategoryArticle;
 import com.xd.pjj.myblog.mapper.ArticleMapper;
+import com.xd.pjj.myblog.mapper.CategoryArticleMapper;
 import com.xd.pjj.myblog.mapper.CategoryMapper;
 import com.xd.pjj.myblog.service.CategoryService;
 import com.xd.pjj.myblog.util.Result;
@@ -12,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,6 +25,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Autowired
     private ArticleMapper articleMapper;
+
+    @Autowired
+    private CategoryArticleMapper categoryArticleMapper;
 
 
     @Override
@@ -69,5 +73,10 @@ public class CategoryServiceImpl implements CategoryService {
             c.setArticleList(articleList);
         }
         return categoryList;
+    }
+
+    @Override
+    public List<CategoryArticle> getCategoryByCid(Integer cid) {
+        return categoryArticleMapper.getByCid(cid);
     }
 }

@@ -24,4 +24,6 @@ public interface CategoryArticleMapper {
     int deleteByAid(int aid);
 
     List<CategoryArticle> getByAid(int aid);
+
+    List<CategoryArticle> getByCid(int cid);
 }
