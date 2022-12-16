@@ -17,7 +17,7 @@
         <!--项目构建编码格式（此处名称固定）-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!--下面名称可自定义，设置的是使用的jar包和依赖的版本号-->
-        <springframework.version>4.1.6.RELEASE</springframework.version>
+        <springframework.version>5.2.20.RELEASE</springframework.version>
         <slf4j-log4j12.version>1.7.12</slf4j-log4j12.version>
         <aspectjweaver.version>1.8.2</aspectjweaver.version>
         <mysql-connector-java.version>5.1.30</mysql-connector-java.version>
